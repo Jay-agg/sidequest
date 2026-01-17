@@ -35,3 +35,4 @@ export {
 } from "./bottom-sheet";
 export { Input } from "./input";
 export { Textarea } from "./textarea";
+export { LoadingSpinner, LoadingDots, LoadingPulse } from "./loading";

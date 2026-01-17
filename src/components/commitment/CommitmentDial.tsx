@@ -40,6 +40,7 @@ export function CommitmentDial() {
   const handleValueCommit = useCallback((value: number[]) => {
     const newMinutes = value[0];
     setDailyMinutes(newMinutes);
+    setLocalValue([newMinutes]);
     if (plan) {
       updatePlanDailyMinutes(newMinutes);
     }
@@ -64,16 +65,16 @@ export function CommitmentDial() {
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-3xl font-display font-bold text-accent">
-              {formatDuration(dailyMinutes)}
+            <span className="text-3xl font-display font-bold text-accent tabular-nums">
+              {formatDuration(localValue[0])}
             </span>
             <motion.span
-              key={currentDepth}
+              key={timeToDepth(localValue[0])}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="px-3 py-1 rounded-full bg-accent/10 text-accent text-sm font-medium capitalize"
             >
-              {currentDepth}
+              {timeToDepth(localValue[0])}
             </motion.span>
           </div>
 
@@ -94,13 +95,13 @@ export function CommitmentDial() {
         </div>
 
         <motion.div
-          key={currentDepth}
+          key={timeToDepth(localValue[0])}
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
           className="p-4 rounded-xl bg-lavender/30"
         >
           <p className="text-sm text-foreground">
-            {depthDescriptions[currentDepth]}
+            {depthDescriptions[timeToDepth(localValue[0])]}
           </p>
         </motion.div>
       </CardContent>

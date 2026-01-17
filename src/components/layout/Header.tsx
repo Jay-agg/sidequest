@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import { Sparkles, RotateCcw } from "lucide-react";
+import { Sparkles, RotateCcw, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLearningPlanStore } from "@/stores";
-import { CircularProgress, Button } from "@/components/ui";
+import { CircularProgress } from "@/components/ui";
+import { ThemeToggle } from "@/components/theme";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
@@ -50,26 +51,30 @@ export function Header({ className }: HeaderProps) {
                     className="text-xs text-foreground-subtle hover:text-accent transition-colors"
                     title="Change hobby"
                   >
-                    <RotateCcw className="h-3 w-3" />
+                    <Settings className="h-3 w-3" />
                   </button>
                 </div>
               )}
             </div>
           </div>
 
-          {plan && (
-            <div className="hidden sm:flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-foreground">
-                  {progress.completed} of {progress.total} mastered
-                </p>
-                <p className="text-xs text-foreground-muted">
-                  {plan.dailyMinutes} min/day
-                </p>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            
+            {plan && (
+              <div className="hidden sm:flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-sm font-medium text-foreground">
+                    {progress.completed} of {progress.total} mastered
+                  </p>
+                  <p className="text-xs text-foreground-muted">
+                    {plan.dailyMinutes} min/day
+                  </p>
+                </div>
+                <CircularProgress value={progress.percentage} size={48} strokeWidth={4} />
               </div>
-              <CircularProgress value={progress.percentage} size={48} strokeWidth={4} />
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </header>

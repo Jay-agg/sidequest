@@ -5,3 +5,4 @@ export * from "./modals";
 export * from "./commitment";
 export * from "./onboarding";
 export * from "./reader";
+export * from "./learning";

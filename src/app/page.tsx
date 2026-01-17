@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lightbulb, BookOpen, ExternalLink } from "lucide-react";
+import { Lightbulb, Flame, Target, Trophy } from "lucide-react";
 import { useLearningPlanStore, useUIStore } from "@/stores";
 import { useIsMobile } from "@/hooks";
 import { Header, MobileNav } from "@/components/layout";
@@ -25,31 +25,30 @@ function LearningDashboard() {
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
     return { completed, total, percentage };
   }, [plan?.techniques?.map((t) => `${t.id}:${t.masteryState}`).join(","), plan?.techniques?.length]);
+
   const openReplaceModal = useUIStore((state) => state.openReplaceModal);
   const openReasoningModal = useUIStore((state) => state.openReasoningModal);
   const openDecompositionModal = useUIStore((state) => state.openDecompositionModal);
   const openReader = useUIStore((state) => state.openReader);
-  const isMobile = useIsMobile();
 
-  const nextTechnique = useLearningPlanStore((state) => {
-    if (!state.plan) return undefined;
-    const sorted = [...state.plan.techniques].sort((a, b) => a.order - b.order);
+  const nextTechnique = useMemo(() => {
+    if (!plan) return undefined;
+    const sorted = [...plan.techniques].sort((a, b) => a.order - b.order);
     return sorted.find((t) => t.masteryState !== "mastered");
-  });
+  }, [plan?.techniques?.map((t) => `${t.id}:${t.masteryState}`).join(",")]);
 
   if (!plan) return null;
 
   const handleStart = (techniqueId: string) => {
     updateTechniqueMastery(techniqueId, "learning");
-    const technique = plan.techniques.find((t) => t.id === techniqueId);
-    if (technique && technique.resources.length > 0) {
-      openReader(technique.resources[0].url, technique.resources[0].title);
-    }
   };
 
   const handleUpdateMastery = (techniqueId: string, state: MasteryState) => {
     updateTechniqueMastery(techniqueId, state);
   };
+
+  const totalPracticeHours = Math.floor((plan.totalPracticeMinutes || 0) / 60);
+  const totalPracticeMinutes = (plan.totalPracticeMinutes || 0) % 60;
 
   return (
     <div className="min-h-screen pb-20 sm:pb-0">
@@ -57,64 +56,115 @@ function LearningDashboard() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-              <h1 className="font-display text-3xl font-bold text-foreground mb-1">
-                Your Learning Path
-              </h1>
-              <p className="text-foreground-muted">
-                {plan.techniques.length} techniques to master {plan.hobby}
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={openReasoningModal}>
-                <Lightbulb className="h-4 w-4" />
-                Why this plan?
-              </Button>
-            </div>
+          {plan.hobbyImageUrl && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8 rounded-3xl overflow-hidden shadow-lg"
+            >
+              <div className="relative aspect-[21/9] sm:aspect-[21/7]">
+                <img
+                  src={plan.hobbyImageUrl}
+                  alt={`${plan.hobby} learning journey`}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+                  <h1 className="font-display text-3xl sm:text-4xl font-bold text-white mb-2 drop-shadow-lg">
+                    Your {plan.hobby} Journey
+                  </h1>
+                  <p className="text-white/90 text-sm sm:text-base drop-shadow-md">
+                    {plan.techniques.length} techniques to master
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${plan.hobbyImageUrl ? 'mb-6' : 'mb-8'}`}>
+            {!plan.hobbyImageUrl && (
+              <div>
+                <h1 className="font-display text-3xl font-bold text-foreground mb-1">
+                  Your {plan.hobby} Journey
+                </h1>
+                <p className="text-foreground-muted">
+                  {plan.techniques.length} techniques to master
+                </p>
+              </div>
+            )}
+            <Button variant="outline" onClick={openReasoningModal} className={plan.hobbyImageUrl ? 'ml-auto' : ''}>
+              <Lightbulb className="h-4 w-4" />
+              Why this plan?
+            </Button>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
-            <Card className="lg:col-span-2">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-display text-xl font-semibold">Progress</h2>
-                  <CircularProgress value={progress.percentage} size={64} strokeWidth={4} />
-                </div>
-                <div className="grid grid-cols-4 gap-4">
-                  {["unstarted", "learning", "practicing", "mastered"].map((state) => {
-                    const count = plan.techniques.filter(
-                      (t) => t.masteryState === state
-                    ).length;
-                    const colors: Record<string, string> = {
-                      unstarted: "bg-foreground-subtle/20",
-                      learning: "bg-sky",
-                      practicing: "bg-peach",
-                      mastered: "bg-mint",
-                    };
-                    return (
-                      <div key={state} className="text-center">
-                        <div
-                          className={`w-8 h-8 mx-auto mb-2 rounded-full ${colors[state]} flex items-center justify-center`}
-                        >
-                          <span className="text-sm font-semibold">{count}</span>
-                        </div>
-                        <p className="text-xs text-foreground-muted capitalize">{state}</p>
-                      </div>
-                    );
-                  })}
+          <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4 mb-8">
+            <Card>
+              <CardContent className="p-4 sm:p-6 flex items-center gap-4">
+                <CircularProgress value={progress.percentage} size={56} strokeWidth={5} />
+                <div>
+                  <p className="text-2xl font-display font-bold text-foreground">
+                    {progress.completed}/{progress.total}
+                  </p>
+                  <p className="text-sm text-foreground-muted">Mastered</p>
                 </div>
               </CardContent>
             </Card>
 
-            <CommitmentDial />
+            <Card>
+              <CardContent className="p-4 sm:p-6 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-warm-yellow/20 flex items-center justify-center">
+                  <Flame className="w-7 h-7 text-orange-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-display font-bold text-foreground">
+                    {plan.streakDays || 0}
+                  </p>
+                  <p className="text-sm text-foreground-muted">Day streak</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4 sm:p-6 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-sky-blue/20 flex items-center justify-center">
+                  <Target className="w-7 h-7 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-display font-bold text-foreground">
+                    {totalPracticeHours > 0 ? `${totalPracticeHours}h ${totalPracticeMinutes}m` : `${totalPracticeMinutes}m`}
+                  </p>
+                  <p className="text-sm text-foreground-muted">Practiced</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4 sm:p-6 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-mint/20 flex items-center justify-center">
+                  <Trophy className="w-7 h-7 text-green-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-display font-bold text-foreground">
+                    {plan.techniques.filter((t) => t.quizCompleted && (t.quizScore || 0) >= 80).length}
+                  </p>
+                  <p className="text-sm text-foreground-muted">Quizzes passed</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <CommitmentDial />
+            </div>
           </div>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
           <div>
             <h2 className="font-display text-2xl font-semibold text-foreground mb-6">
-              Your Learning Journey
+              Your Techniques
             </h2>
             <div className="space-y-4">
               <AnimatePresence>
@@ -137,37 +187,6 @@ function LearningDashboard() {
                         onReplace={() => openReplaceModal(technique.id)}
                         onDecompose={() => openDecompositionModal(technique.id)}
                       />
-                      
-                      {technique.id === nextTechnique?.id && technique.resources.length > 0 && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          className="mt-3 grid gap-3 sm:grid-cols-2"
-                        >
-                          {technique.resources.map((resource) => (
-                            <Card
-                              key={resource.id}
-                              className="cursor-pointer hover:bg-lavender/20 transition-all"
-                              onClick={() => openReader(resource.url, resource.title)}
-                            >
-                              <CardContent className="p-4 flex items-start gap-3">
-                                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                                  <BookOpen className="h-5 w-5 text-accent" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-medium text-foreground line-clamp-1">
-                                    {resource.title}
-                                  </p>
-                                  <p className="text-xs text-foreground-muted">
-                                    {resource.type} - {resource.estimatedMinutes} min
-                                  </p>
-                                </div>
-                                <ExternalLink className="h-4 w-4 text-foreground-subtle" />
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </motion.div>
-                      )}
                     </motion.div>
                   ))}
               </AnimatePresence>

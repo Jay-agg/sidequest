@@ -24,6 +24,22 @@ export const ResourceSchema = z.object({
 
 export type Resource = z.infer<typeof ResourceSchema>;
 
+export const QuizQuestionSchema = z.object({
+  question: z.string(),
+  options: z.array(z.string()).min(2).max(4),
+  correctIndex: z.number().min(0).max(3),
+});
+
+export type QuizQuestion = z.infer<typeof QuizQuestionSchema>;
+
+export const PracticeResourceSchema = z.object({
+  name: z.string(),
+  url: z.string(),
+  description: z.string(),
+});
+
+export type PracticeResource = z.infer<typeof PracticeResourceSchema>;
+
 export const TechniqueSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -36,6 +52,13 @@ export const TechniqueSchema = z.object({
   prerequisites: z.array(z.string()).default([]),
   microSteps: z.array(z.string()).optional(),
   order: z.number(),
+  youtubeQuery: z.string().optional(),
+  quizQuestions: z.array(QuizQuestionSchema).optional(),
+  quizScore: z.number().optional(),
+  quizCompleted: z.boolean().optional(),
+  practiceMinutes: z.number().optional(),
+  lastPracticed: z.number().optional(),
+  practiceResource: PracticeResourceSchema.optional(),
 });
 
 export type Technique = z.infer<typeof TechniqueSchema>;
@@ -49,6 +72,14 @@ export const LearningPlanSchema = z.object({
   reasoning: z.string(),
   createdAt: z.number(),
   updatedAt: z.number(),
+  totalPracticeMinutes: z.number().optional(),
+  streakDays: z.number().optional(),
+  lastPracticeDate: z.string().optional(),
+  isTimerUseful: z.boolean().optional(),
+  timerRationale: z.string().optional(),
+  freeResourcesUrl: z.string().optional(),
+  freeResourcesDescription: z.string().optional(),
+  hobbyImageUrl: z.string().optional(),
 });
 
 export type LearningPlan = z.infer<typeof LearningPlanSchema>;
@@ -75,6 +106,9 @@ export const GeneratedTechniqueSchema = z.object({
   }),
   prerequisites: z.array(z.string()),
   difficulty: z.number().min(1).max(10),
+  youtubeQuery: z.string().optional(),
+  quizQuestions: z.array(QuizQuestionSchema).optional(),
+  practiceResource: PracticeResourceSchema.optional(),
 });
 
 export type GeneratedTechnique = z.infer<typeof GeneratedTechniqueSchema>;

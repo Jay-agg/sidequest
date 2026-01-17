@@ -1,17 +1,20 @@
 import type { Metadata } from "next";
-import { DM_Sans, Nunito } from "next/font/google";
+import { Public_Sans, Lora } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme";
 
-const dmSans = DM_Sans({
+const publicSans = Public_Sans({
   subsets: ["latin"],
-  variable: "--font-dm-sans",
+  variable: "--font-public-sans",
   display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
-const nunito = Nunito({
+const lora = Lora({
   subsets: ["latin"],
-  variable: "--font-nunito",
+  variable: "--font-lora",
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -27,8 +30,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${nunito.variable}`}>
-      <body className="min-h-screen antialiased">{children}</body>
+    <html lang="en" className={`${publicSans.variable} ${lora.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen antialiased">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

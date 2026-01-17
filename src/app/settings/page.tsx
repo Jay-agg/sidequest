@@ -176,7 +176,7 @@ function SettingsContent() {
               Start a New Learning Plan
             </DialogTitle>
             <DialogDescription>
-              This will clear your current progress for {plan.hobby} and let you choose a different hobby to learn. Your current plan will be lost.
+              This will clear your current progress for {plan?.hobby || "your hobby"} and let you choose a different hobby to learn. Your current plan will be lost.
             </DialogDescription>
           </DialogHeader>
           <div className="p-4 bg-lavender/20 rounded-xl mb-4">

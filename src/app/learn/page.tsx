@@ -1,228 +1,411 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, BookOpen, ExternalLink, CheckCircle2 } from "lucide-react";
-import { useLearningPlanStore, useUIStore } from "@/stores";
-import { useIsMobile } from "@/hooks";
-import { Header, MobileNav } from "@/components/layout";
-import { Button, Card, CardContent, Progress } from "@/components/ui";
-import { ReplaceModal, ReasoningModal, DecompositionModal } from "@/components/modals";
-import { FocusedReader } from "@/components/reader";
-import { OnboardingForm } from "@/components/onboarding";
-import type { Technique, MasteryState } from "@/types";
+import {
+  ArrowLeft,
+  Play,
+  BookOpen,
+  Brain,
+  Timer,
+  CheckCircle2,
+  ChevronRight,
+  Sparkles,
+  Trophy,
+  Target,
+  Flame,
+} from "lucide-react";
+import { Button, Card, CardContent, CircularProgress } from "@/components/ui";
+import { useLearningPlanStore } from "@/stores";
+import { Quiz, VideoPlayer, PracticeTimer } from "@/components/learning";
+import type { MasteryState, QuizQuestion } from "@/types";
 
-function TechniqueDetail({ technique }: { technique: Technique }) {
-  const updateTechniqueMastery = useLearningPlanStore((state) => state.updateTechniqueMastery);
-  const openReader = useUIStore((state) => state.openReader);
-  const openReplaceModal = useUIStore((state) => state.openReplaceModal);
-  const openDecompositionModal = useUIStore((state) => state.openDecompositionModal);
+type Tab = "learn" | "practice" | "quiz";
 
-  const handleProgressState = () => {
-    const progression: Record<MasteryState, MasteryState> = {
-      unstarted: "learning",
-      learning: "practicing",
-      practicing: "mastered",
-      mastered: "mastered",
-    };
-    updateTechniqueMastery(technique.id, progression[technique.masteryState]);
-  };
+const masteryLabels: Record<MasteryState, { label: string; color: string }> = {
+  unstarted: { label: "Not Started", color: "bg-muted text-foreground-muted" },
+  learning: { label: "Learning", color: "bg-sky-blue/30 text-sky-500" },
+  practicing: { label: "Practicing", color: "bg-warm-yellow/30 text-yellow-500" },
+  mastered: { label: "Mastered", color: "bg-mint/30 text-green-500" },
+};
 
-  const stateLabels: Record<MasteryState, string> = {
-    unstarted: "Start Learning",
-    learning: "Mark as Practicing",
-    practicing: "Mark as Mastered",
-    mastered: "Mastered",
-  };
+const defaultQuizQuestions: QuizQuestion[] = [
+  {
+    question: "What is the most important aspect when learning a new skill?",
+    options: ["Speed", "Consistency and proper form", "Natural talent", "Expensive equipment"],
+    correctIndex: 1,
+  },
+  {
+    question: "How should you approach practice sessions?",
+    options: ["Practice randomly", "Focus on weaknesses systematically", "Only practice what you're good at", "Avoid practicing"],
+    correctIndex: 1,
+  },
+  {
+    question: "When should you move to the next technique?",
+    options: ["Immediately", "When you feel comfortable with the current one", "After one try", "Never"],
+    correctIndex: 1,
+  },
+];
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="space-y-6"
-    >
-      <div>
-        <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-          {technique.name}
-        </h2>
-        <p className="text-foreground-muted">{technique.description}</p>
-      </div>
-
-      <Card className="bg-lavender/20">
-        <CardContent className="p-4">
-          <h3 className="font-medium text-foreground mb-1">Why this matters</h3>
-          <p className="text-sm text-foreground-muted">{technique.whyItMatters}</p>
-        </CardContent>
-      </Card>
-
-      {technique.microSteps && technique.microSteps.length > 0 && (
-        <Card className="bg-mint/20">
-          <CardContent className="p-4">
-            <h3 className="font-medium text-foreground mb-3">Simplified Steps</h3>
-            <ol className="space-y-2">
-              {technique.microSteps.map((step, index) => (
-                <li key={index} className="flex items-start gap-3 text-sm">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-success text-white text-xs flex items-center justify-center font-medium">
-                    {index + 1}
-                  </span>
-                  <span className="text-foreground">{step}</span>
-                </li>
-              ))}
-            </ol>
-          </CardContent>
-        </Card>
-      )}
-
-      {technique.resources.length > 0 && (
-        <div>
-          <h3 className="font-display font-semibold text-foreground mb-3">Resources</h3>
-          <div className="space-y-3">
-            {technique.resources.map((resource) => (
-              <Card
-                key={resource.id}
-                className="cursor-pointer hover:bg-lavender/20 transition-all"
-                onClick={() => openReader(resource.url, resource.title)}
-              >
-                <CardContent className="p-4 flex items-start gap-3">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                    <BookOpen className="h-5 w-5 text-accent" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground">{resource.title}</p>
-                    <p className="text-sm text-foreground-muted">{resource.description}</p>
-                    <p className="text-xs text-foreground-subtle mt-1">
-                      {resource.type} - {resource.estimatedMinutes} min
-                    </p>
-                  </div>
-                  <ExternalLink className="h-4 w-4 text-foreground-subtle" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-col sm:flex-row gap-3 pt-4">
-        <Button
-          className="flex-1"
-          variant={technique.masteryState === "mastered" ? "success" : "default"}
-          onClick={handleProgressState}
-          disabled={technique.masteryState === "mastered"}
-        >
-          {technique.masteryState === "mastered" && <CheckCircle2 className="h-4 w-4" />}
-          {stateLabels[technique.masteryState]}
-        </Button>
-
-        {technique.masteryState !== "mastered" && technique.masteryState !== "unstarted" && (
-          <Button variant="outline" onClick={() => openDecompositionModal(technique.id)}>
-            Too Hard
-          </Button>
-        )}
-
-        <Button variant="ghost" onClick={() => openReplaceModal(technique.id)}>
-          Replace
-        </Button>
-      </div>
-    </motion.div>
-  );
-}
-
-function LearnContent() {
+export default function LearnPage() {
+  const router = useRouter();
   const plan = useLearningPlanStore((state) => state.plan);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const isMobile = useIsMobile();
-  const setIsMobile = useUIStore((state) => state.setIsMobile);
+  const activeTechniqueId = useLearningPlanStore((state) => state.activeTechniqueId);
+  const setActiveTechnique = useLearningPlanStore((state) => state.setActiveTechnique);
+  const updateTechniqueMastery = useLearningPlanStore((state) => state.updateTechniqueMastery);
+  const updateQuizScore = useLearningPlanStore((state) => state.updateQuizScore);
+  const logPractice = useLearningPlanStore((state) => state.logPractice);
+
+  const [activeTab, setActiveTab] = useState<Tab>("learn");
+
+  const technique = useMemo(() => {
+    if (!plan) return null;
+    if (activeTechniqueId) {
+      return plan.techniques.find((t) => t.id === activeTechniqueId) || null;
+    }
+    const sorted = [...plan.techniques].sort((a, b) => a.order - b.order);
+    return sorted.find((t) => t.masteryState !== "mastered") || sorted[0];
+  }, [plan, activeTechniqueId]);
 
   useEffect(() => {
-    setIsMobile(isMobile);
-  }, [isMobile, setIsMobile]);
-
-  if (!plan) return <OnboardingForm />;
-
-  const sortedTechniques = [...plan.techniques].sort((a, b) => a.order - b.order);
-  const currentTechnique = sortedTechniques[currentIndex];
-  const progress = ((currentIndex + 1) / sortedTechniques.length) * 100;
-
-  const goNext = () => {
-    if (currentIndex < sortedTechniques.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+    if (!plan) {
+      router.push("/");
     }
-  };
+  }, [plan, router]);
 
-  const goPrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+  useEffect(() => {
+    if (technique && technique.masteryState === "unstarted") {
+      updateTechniqueMastery(technique.id, "learning");
     }
-  };
+  }, [technique?.id]);
+
+  const handleQuizComplete = useCallback((score: number) => {
+    if (!technique) return;
+    updateQuizScore(technique.id, score);
+    if (score >= 80) {
+      setActiveTab("practice");
+    }
+  }, [technique, updateQuizScore]);
+
+  const handlePracticeComplete = useCallback((minutes: number) => {
+    if (!technique) return;
+    logPractice(technique.id, minutes);
+    updateTechniqueMastery(technique.id, "practicing");
+  }, [technique, logPractice, updateTechniqueMastery]);
+
+  const handleMarkMastered = useCallback(() => {
+    if (!technique) return;
+    updateTechniqueMastery(technique.id, "mastered");
+    
+    if (plan) {
+      const sorted = [...plan.techniques].sort((a, b) => a.order - b.order);
+      const nextTech = sorted.find((t) => t.id !== technique.id && t.masteryState !== "mastered");
+      if (nextTech) {
+        setActiveTechnique(nextTech.id);
+        setActiveTab("learn");
+      } else {
+        router.push("/");
+      }
+    }
+  }, [technique, plan, updateTechniqueMastery, setActiveTechnique, router]);
+
+  const progress = useMemo(() => {
+    if (!plan) return 0;
+    const completed = plan.techniques.filter((t) => t.masteryState === "mastered").length;
+    return Math.round((completed / plan.techniques.length) * 100);
+  }, [plan?.techniques.map((t) => t.masteryState).join(",")]);
+
+  if (!plan || !technique) {
+    return null;
+  }
+
+  const quizQuestions = technique.quizQuestions || defaultQuizQuestions;
+  const youtubeQuery = technique.youtubeQuery || `${technique.name} ${plan.hobby} tutorial`;
+  const masteryInfo = masteryLabels[technique.masteryState];
 
   return (
-    <div className="min-h-screen pb-20 sm:pb-0">
-      <Header />
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b border-card-border">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push("/")}
+              className="gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Back to Plan</span>
+            </Button>
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-foreground-muted">
-              Technique {currentIndex + 1} of {sortedTechniques.length}
+            <div className="flex items-center gap-4">
+              {plan.streakDays && plan.streakDays > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-warm-yellow/20 text-sm">
+                  <Flame className="w-4 h-4 text-orange-500" />
+                  <span className="font-medium text-foreground">{plan.streakDays} day streak</span>
+                </div>
+              )}
+              <CircularProgress value={progress} size={40} strokeWidth={4} />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 py-6 pb-24">
+        <div className="mb-8">
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${masteryInfo.color}`}>
+              {masteryInfo.label}
             </span>
-            <span className="text-sm font-medium text-accent">
-              {Math.round(progress)}%
+            <span className="text-sm text-foreground-muted">
+              Technique {(technique.order || 0) + 1} of {plan.techniques.length}
             </span>
           </div>
-          <Progress value={progress} />
+
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-2">
+            {technique.name}
+          </h1>
+          <p className="text-foreground-muted">{technique.description}</p>
         </div>
 
-        <div className="flex items-center justify-between mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={goPrev}
-            disabled={currentIndex === 0}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
+        <Card className="mb-6 bg-lavender/10 border-lavender/30">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-lavender/30 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-5 h-5 text-purple-400" />
+              </div>
+              <div>
+                <h3 className="font-medium text-foreground mb-1">Why this matters</h3>
+                <p className="text-sm text-foreground-muted">{technique.whyItMatters}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          <div className="flex gap-1">
-            {sortedTechniques.map((t, i) => (
-              <button
-                key={t.id}
-                onClick={() => setCurrentIndex(i)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  i === currentIndex
-                    ? "bg-accent w-6"
-                    : t.masteryState === "mastered"
-                    ? "bg-mint"
-                    : "bg-foreground-subtle/30"
-                }`}
-              />
-            ))}
-          </div>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={goNext}
-            disabled={currentIndex === sortedTechniques.length - 1}
-          >
-            <ChevronRight className="h-5 w-5" />
-          </Button>
+        <div className="flex gap-1 p-1 mb-6 rounded-xl bg-card border border-card-border">
+          {[
+            { id: "learn" as const, label: "Learn", icon: Play },
+            { id: "quiz" as const, label: "Quiz", icon: Brain },
+            { id: "practice" as const, label: "Practice", icon: Timer },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                activeTab === tab.id
+                  ? "bg-accent text-accent-foreground"
+                  : "text-foreground-muted hover:text-foreground hover:bg-accent/10"
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              <span className="hidden sm:inline">{tab.label}</span>
+            </button>
+          ))}
         </div>
 
         <AnimatePresence mode="wait">
-          <TechniqueDetail key={currentTechnique.id} technique={currentTechnique} />
+          {activeTab === "learn" && (
+            <motion.div
+              key="learn"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <Card>
+                <CardContent className="p-4 sm:p-6">
+                  <h2 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-accent" />
+                    Video Tutorials
+                  </h2>
+                  <VideoPlayer query={youtubeQuery} techniqueName={technique.name} />
+                </CardContent>
+              </Card>
+
+              <div className="mt-6 flex justify-end">
+                <Button onClick={() => setActiveTab("quiz")} className="gap-2">
+                  Take the Quiz
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === "quiz" && (
+            <motion.div
+              key="quiz"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <Card>
+                <CardContent className="p-4 sm:p-6">
+                  <h2 className="font-display text-xl font-bold text-foreground mb-6 flex items-center gap-2">
+                    <Brain className="w-5 h-5 text-accent" />
+                    Test Your Knowledge
+                  </h2>
+                  
+                  {technique.quizCompleted && technique.quizScore !== undefined ? (
+                    <div className="text-center py-8">
+                      <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
+                        technique.quizScore >= 80 ? "bg-mint/30" : "bg-warm-yellow/30"
+                      }`}>
+                        <Trophy className={`w-8 h-8 ${
+                          technique.quizScore >= 80 ? "text-green-500" : "text-yellow-500"
+                        }`} />
+                      </div>
+                      <h3 className="font-display text-xl font-bold text-foreground mb-2">
+                        Previous Score: {technique.quizScore}%
+                      </h3>
+                      <p className="text-foreground-muted mb-6">
+                        {technique.quizScore >= 80 
+                          ? "Great job! You've demonstrated understanding of this technique."
+                          : "Consider reviewing the material and trying again."}
+                      </p>
+                      <div className="flex justify-center gap-3">
+                        <Button variant="outline" onClick={() => setActiveTab("learn")}>
+                          Review Material
+                        </Button>
+                        <Button onClick={() => setActiveTab("practice")}>
+                          Start Practice
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Quiz
+                      questions={quizQuestions}
+                      onComplete={handleQuizComplete}
+                      techniqueName={technique.name}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {activeTab === "practice" && (
+            <motion.div
+              key="practice"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <Card>
+                <CardContent className="p-4 sm:p-6">
+                  <h2 className="font-display text-xl font-bold text-foreground mb-2 flex items-center gap-2">
+                    <Timer className="w-5 h-5 text-accent" />
+                    Practice Session
+                  </h2>
+                  
+                  {plan.isTimerUseful === false && plan.timerRationale && (
+                    <div className="mb-4 p-4 rounded-xl bg-warm-yellow/10 border border-warm-yellow/30">
+                      <p className="text-sm text-foreground-muted">
+                        <strong>Note:</strong> {plan.timerRationale}
+                      </p>
+                    </div>
+                  )}
+                  
+                  <p className="text-foreground-muted mb-6">
+                    {plan.isTimerUseful !== false 
+                      ? `Set a timer and practice ${technique.name.toLowerCase()}. Deliberate practice is the key to mastery.`
+                      : `Practice ${technique.name.toLowerCase()} at your own pace. Focus on quality over timed sessions.`}
+                  </p>
+
+                  {technique.practiceResource && (
+                    <div className="mb-6 p-4 rounded-xl bg-sky/10 border border-sky/30">
+                      <h3 className="font-medium text-foreground mb-2">Free Practice Resource</h3>
+                      <p className="text-sm text-foreground-muted mb-3">
+                        {technique.practiceResource.description}
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(technique.practiceResource!.url, '_blank')}
+                        className="gap-2"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        Visit {technique.practiceResource.name}
+                      </Button>
+                    </div>
+                  )}
+
+                  <PracticeTimer
+                    targetMinutes={technique.estimatedMinutes}
+                    onComplete={handlePracticeComplete}
+                  />
+
+                  {technique.practiceMinutes && technique.practiceMinutes > 0 && (
+                    <div className="mt-6 p-4 rounded-xl bg-mint/10 border border-mint/30">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-mint/30 flex items-center justify-center">
+                          <Target className="w-5 h-5 text-green-500" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-foreground-muted">Total practice time</p>
+                          <p className="font-display font-bold text-foreground">
+                            {technique.practiceMinutes} minutes
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {technique.practiceMinutes && technique.practiceMinutes >= technique.estimatedMinutes && (
+                <div className="mt-6">
+                  <Card className="bg-accent/5 border-accent/30">
+                    <CardContent className="p-6 text-center">
+                      <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-accent" />
+                      <h3 className="font-display text-xl font-bold text-foreground mb-2">
+                        Ready to Master This?
+                      </h3>
+                      <p className="text-foreground-muted mb-4">
+                        You've practiced enough to mark this technique as mastered and move on.
+                      </p>
+                      <Button onClick={handleMarkMastered} size="lg" className="gap-2">
+                        <CheckCircle2 className="w-4 h-4" />
+                        Mark as Mastered
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </motion.div>
+          )}
         </AnimatePresence>
       </main>
 
-      <MobileNav />
-      <ReplaceModal />
-      <ReasoningModal />
-      <DecompositionModal />
-      <FocusedReader />
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-lg border-t border-card-border lg:hidden">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-3 overflow-x-auto pb-2">
+            {plan.techniques
+              .sort((a, b) => a.order - b.order)
+              .map((tech, index) => (
+                <button
+                  key={tech.id}
+                  onClick={() => {
+                    setActiveTechnique(tech.id);
+                    setActiveTab("learn");
+                  }}
+                  className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-sm font-medium transition-all ${
+                    tech.id === technique.id
+                      ? "bg-accent text-accent-foreground"
+                      : tech.masteryState === "mastered"
+                      ? "bg-mint/30 text-green-500"
+                      : "bg-card text-foreground-muted hover:bg-accent/10"
+                  }`}
+                >
+                  {tech.masteryState === "mastered" ? (
+                    <CheckCircle2 className="w-4 h-4" />
+                  ) : (
+                    index + 1
+                  )}
+                </button>
+              ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
-
-export default function LearnPage() {
-  return <LearnContent />;
 }

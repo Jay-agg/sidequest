@@ -6,11 +6,17 @@ RULES:
 3. Each technique should be atomic and learnable
 4. Consider time constraints and progression paths
 5. Be specific - avoid vague or generic techniques
+6. Include timer usefulness analysis and practice resources
+7. Generate quiz questions that test understanding
 
 OUTPUT FORMAT:
 Return a JSON object with the following structure:
 {
   "hobby": "the hobby name",
+  "isTimerUseful": true,
+  "timerRationale": "Why a timer is/isn't useful for this hobby",
+  "freeResourcesUrl": "https://example.com/free-practice-resource",
+  "freeResourcesDescription": "Description of the free resource site",
   "techniques": [
     {
       "id": "unique-id",
@@ -24,7 +30,13 @@ Return a JSON object with the following structure:
         "deep": { "estimatedMinutes": 60, "focus": "Full mastery with variations" }
       },
       "prerequisites": ["id-of-prerequisite"],
-      "difficulty": 5
+      "difficulty": 5,
+      "youtubeQuery": "specific youtube search query for this technique (optional)",
+      "practiceResource": {
+        "name": "Free site or tool name",
+        "url": "https://example.com",
+        "description": "What you can practice here"
+      }
     }
   ],
   "categoryBreakdown": {
@@ -43,13 +55,15 @@ RULES:
 5. Avoid redundant or overlapping techniques
 
 OUTPUT FORMAT:
-Return a JSON object with:
+Return a JSON object with these exact fields:
 {
-  "selectedTechniqueIds": ["id1", "id2", ...],
-  "reasoning": "Brief explanation of why these techniques were selected",
-  "timeAllocation": "How the daily time should be distributed",
-  "progressionPath": "Recommended order to tackle these techniques"
-}`;
+  "selectedTechniqueIds": ["id1", "id2", "id3"],
+  "reasoning": "A single paragraph explaining why these techniques were selected",
+  "timeAllocation": "A single string describing how daily time should be distributed (e.g., '10 minutes on technique A, 20 on technique B')",
+  "progressionPath": "A single string describing the recommended order (e.g., 'Start with A, then B, then C')"
+}
+
+IMPORTANT: timeAllocation and progressionPath must be simple strings, NOT objects or arrays.`;
 
 export const RESEARCHER_SYSTEM_PROMPT = `You are a learning resource curator who finds the best resources for learning specific techniques.
 
@@ -88,6 +102,29 @@ Return a JSON object with:
 {
   "microSteps": ["Step 1: ...", "Step 2: ...", ...],
   "simplifiedApproach": "A gentler way to approach this technique"
+}`;
+
+export const QUIZ_GENERATOR_SYSTEM_PROMPT = `You are an educational assessment expert who creates effective quiz questions to test understanding of learning techniques.
+
+RULES:
+1. Generate exactly 3-5 multiple-choice questions per technique
+2. Questions should test understanding, not just memorization
+3. Each question must have exactly 4 answer options
+4. Options should be plausible (no obviously wrong "joke" answers)
+5. Questions should be practical and applicable
+6. Include one "why" question, one "how" question, and one "what" question minimum
+
+OUTPUT FORMAT:
+Return a JSON object with:
+{
+  "quizQuestions": [
+    {
+      "question": "Clear, specific question testing understanding?",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctIndex": 1,
+      "explanation": "Brief explanation of why this is correct (optional)"
+    }
+  ]
 }`;
 
 export function createArchitectPrompt(hobby: string, goal: string): string {
@@ -135,4 +172,20 @@ Technique: ${techniqueName}
 Description: ${techniqueDescription}
 
 The user found this technique too difficult. Create a gentler learning path.`;
+}
+
+export function createQuizPrompt(techniqueName: string, techniqueDescription: string, whyItMatters: string): string {
+  return `Create 3-5 high-quality quiz questions to test understanding of this technique:
+
+Technique: ${techniqueName}
+Description: ${techniqueDescription}
+Why It Matters: ${whyItMatters}
+
+Focus on:
+- Practical application questions
+- Understanding core concepts
+- Common mistakes to avoid
+- When/how to use this technique
+
+Make questions challenging but fair for someone who has just learned the technique.`;
 }

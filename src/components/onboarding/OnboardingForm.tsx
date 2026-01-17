@@ -2,104 +2,19 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
-import { Button, Input, Textarea, Slider, Card, CardContent } from "@/components/ui";
+import { Sparkles, ArrowRight, ArrowLeft } from "lucide-react";
+import { Button, Input, Textarea, Slider, Card, CardContent, LoadingPulse } from "@/components/ui";
 import { useLearningPlanStore } from "@/stores";
 import { formatDuration } from "@/lib/utils";
-import type { LearningPlan, Technique } from "@/types";
-import { generateId } from "@/lib/utils";
 
-type Step = "hobby" | "goal" | "time" | "generating";
-
-const sampleTechniques: Technique[] = [
-  {
-    id: generateId(),
-    name: "Basic Chord Progressions",
-    description: "Learn the fundamental chord shapes and transitions that form the backbone of most songs",
-    whyItMatters: "85% of popular songs use just 4 basic chords - master these and you can play thousands of songs",
-    estimatedMinutes: 25,
-    depthLevel: "intermediate",
-    masteryState: "unstarted",
-    resources: [
-      {
-        id: generateId(),
-        title: "Beginner Guitar Chords Guide",
-        url: "https://example.com/chords",
-        type: "article",
-        estimatedMinutes: 15,
-        description: "Visual guide to essential guitar chords",
-      },
-    ],
-    prerequisites: [],
-    order: 0,
-  },
-  {
-    id: generateId(),
-    name: "Strumming Patterns",
-    description: "Develop rhythm through essential strumming techniques",
-    whyItMatters: "Good rhythm is what makes music sound musical - even simple chords sound great with solid rhythm",
-    estimatedMinutes: 20,
-    depthLevel: "intermediate",
-    masteryState: "unstarted",
-    resources: [],
-    prerequisites: [],
-    order: 1,
-  },
-  {
-    id: generateId(),
-    name: "Finger Positioning",
-    description: "Learn proper hand placement to reduce fatigue and increase speed",
-    whyItMatters: "Correct technique prevents injury and makes playing easier as you advance",
-    estimatedMinutes: 15,
-    depthLevel: "intermediate",
-    masteryState: "unstarted",
-    resources: [],
-    prerequisites: [],
-    order: 2,
-  },
-  {
-    id: generateId(),
-    name: "Simple Melodies",
-    description: "Play recognizable tunes using single notes",
-    whyItMatters: "Builds finger independence and ear training while keeping practice fun",
-    estimatedMinutes: 20,
-    depthLevel: "intermediate",
-    masteryState: "unstarted",
-    resources: [],
-    prerequisites: [],
-    order: 3,
-  },
-  {
-    id: generateId(),
-    name: "Chord Transitions",
-    description: "Practice smooth movement between chords",
-    whyItMatters: "Seamless transitions are what separate beginners from intermediate players",
-    estimatedMinutes: 25,
-    depthLevel: "intermediate",
-    masteryState: "unstarted",
-    resources: [],
-    prerequisites: [],
-    order: 4,
-  },
-  {
-    id: generateId(),
-    name: "Reading Tablature",
-    description: "Understand guitar tabs to learn any song",
-    whyItMatters: "Tabs let you learn thousands of songs without reading traditional sheet music",
-    estimatedMinutes: 15,
-    depthLevel: "intermediate",
-    masteryState: "unstarted",
-    resources: [],
-    prerequisites: [],
-    order: 5,
-  },
-];
+type Step = "hobby" | "goal" | "time" | "generating" | "error";
 
 export function OnboardingForm() {
   const [step, setStep] = useState<Step>("hobby");
   const [hobby, setHobby] = useState("");
   const [goal, setGoal] = useState("");
   const [dailyMinutes, setDailyMinutes] = useState(30);
+  const [error, setError] = useState<string | null>(null);
   const setPlan = useLearningPlanStore((state) => state.setPlan);
   const setIsGenerating = useLearningPlanStore((state) => state.setIsGenerating);
 
@@ -112,36 +27,34 @@ export function OnboardingForm() {
   const handleBack = () => {
     if (step === "goal") setStep("hobby");
     else if (step === "time") setStep("goal");
+    else if (step === "error") setStep("time");
   };
 
   const handleGenerate = async () => {
     setStep("generating");
     setIsGenerating(true);
+    setError(null);
 
-    await new Promise((resolve) => setTimeout(resolve, 2500));
+    try {
+      const response = await fetch("/api/generate-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hobby, goal, dailyMinutes }),
+      });
 
-    const actualTechniques = sampleTechniques.map((tech, index) => ({
-      ...tech,
-      id: generateId(),
-      name: `${hobby} Technique ${index + 1}`,
-      description: `Learn essential ${hobby} skills - technique ${index + 1}`,
-      whyItMatters: `This technique helps you progress in ${hobby}`,
-      order: index,
-    }));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate plan");
+      }
 
-    const plan: LearningPlan = {
-      id: generateId(),
-      hobby: hobby || "Your Hobby",
-      goal: goal || "Master the fundamentals",
-      dailyMinutes,
-      techniques: actualTechniques,
-      reasoning: `This plan focuses on the most impactful techniques for learning ${hobby}. The techniques are ordered to build on each other, starting with fundamentals and progressing to more advanced skills. With ${dailyMinutes} minutes per day, you'll make steady progress toward: ${goal}`,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-
-    setPlan(plan);
-    setIsGenerating(false);
+      const plan = await response.json();
+      setPlan(plan);
+      setIsGenerating(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+      setIsGenerating(false);
+      setStep("error");
+    }
   };
 
   const canProceed = () => {
@@ -184,7 +97,7 @@ export function OnboardingForm() {
                     Choose ONE hobby or skill to master
                   </label>
                   <Input
-                    placeholder="e.g., Guitar, Watercolor painting, Chess..."
+                    placeholder="e.g., Guitar, Swimming, Chess, Poker..."
                     value={hobby}
                     onChange={(e) => setHobby(e.target.value)}
                     autoFocus
@@ -228,7 +141,7 @@ export function OnboardingForm() {
                     Your learning goal
                   </label>
                   <Textarea
-                    placeholder="e.g., Play my favorite songs at campfires, paint landscapes for my apartment..."
+                    placeholder="e.g., Swim comfortably in a pool, play songs at parties, win local chess tournaments..."
                     value={goal}
                     onChange={(e) => setGoal(e.target.value)}
                     autoFocus
@@ -313,19 +226,36 @@ export function OnboardingForm() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="text-center py-12"
               >
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                  className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-accent/10 flex items-center justify-center"
-                >
-                  <Loader2 className="h-10 w-10 text-accent" />
-                </motion.div>
-                <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                  Creating your plan
+                <LoadingPulse />
+                <h2 className="font-display text-2xl font-bold text-foreground mb-2 mt-6">
+                  Creating your learning path
                 </h2>
                 <p className="text-foreground-muted">
-                  Analyzing techniques and selecting the most impactful ones...
+                  Selecting the most impactful techniques for {hobby}...
                 </p>
+              </motion.div>
+            )}
+
+            {step === "error" && (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-12"
+              >
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive/20 flex items-center justify-center">
+                  <span className="text-2xl">!</span>
+                </div>
+                <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+                  Something went wrong
+                </h2>
+                <p className="text-foreground-muted mb-6">
+                  {error || "Failed to create your plan. Please try again."}
+                </p>
+                <Button onClick={handleBack}>
+                  <ArrowLeft className="h-4 w-4" />
+                  Go Back
+                </Button>
               </motion.div>
             )}
           </AnimatePresence>

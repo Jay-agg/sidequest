@@ -1,21 +1,25 @@
 import OpenAI from "openai";
-import type { LearningPlan, Technique, GeneratedTechnique, Resource } from "@/types";
+import { z } from "zod";
+import type { LearningPlan, Technique, GeneratedTechnique, Resource, DepthLevel } from "@/types";
 import { generateId } from "@/lib/utils";
 import {
   ArchitectResponseSchema,
   FilterResponseSchema,
   ResearcherResponseSchema,
   DecompositionResponseSchema,
+  QuizGeneratorResponseSchema,
 } from "./schemas";
 import {
   ARCHITECT_SYSTEM_PROMPT,
   FILTER_SYSTEM_PROMPT,
   RESEARCHER_SYSTEM_PROMPT,
   DECOMPOSITION_SYSTEM_PROMPT,
+  QUIZ_GENERATOR_SYSTEM_PROMPT,
   createArchitectPrompt,
   createFilterPrompt,
   createResearcherPrompt,
   createDecompositionPrompt,
+  createQuizPrompt,
 } from "./prompts";
 
 let openaiClient: OpenAI | null = null;
@@ -50,14 +54,14 @@ async function callLLM(
 export async function runArchitectStage(
   hobby: string,
   goal: string
-): Promise<GeneratedTechnique[]> {
+): Promise<z.infer<typeof ArchitectResponseSchema>> {
   const prompt = createArchitectPrompt(hobby, goal);
   const response = await callLLM(ARCHITECT_SYSTEM_PROMPT, prompt);
 
   const parsed = JSON.parse(response);
   const validated = ArchitectResponseSchema.parse(parsed);
 
-  return validated.techniques;
+  return validated;
 }
 
 export async function runFilterStage(
@@ -112,57 +116,113 @@ export async function runDecompositionStage(
   return validated.microSteps;
 }
 
+export async function runQuizGeneratorStage(
+  techniqueName: string,
+  techniqueDescription: string,
+  whyItMatters: string
+): Promise<Array<{ question: string; options: string[]; correctIndex: number; explanation?: string }>> {
+  const prompt = createQuizPrompt(techniqueName, techniqueDescription, whyItMatters);
+  const response = await callLLM(QUIZ_GENERATOR_SYSTEM_PROMPT, prompt);
+
+  const parsed = JSON.parse(response);
+  const validated = QuizGeneratorResponseSchema.parse(parsed);
+
+  return validated.quizQuestions;
+}
+
+export async function generateHobbyImage(hobby: string): Promise<string | undefined> {
+  try {
+    const client = getOpenAIClient();
+    const imagePrompt = `A tasteful, surrealist editorial illustration representing ${hobby}. Style: soft pastel colors, rounded forms, dreamlike atmosphere, subtle textures, clean lines, no harsh shadows, no text, abstract and symbolic elements. The image should be calming and visually appealing.`;
+    
+    console.log(`🎨 Generating hobby image for: ${hobby}`);
+    const response = await client.images.generate({
+      model: "dall-e-3",
+      prompt: imagePrompt,
+      n: 1,
+      size: "1024x1024",
+      quality: "standard",
+      style: "natural",
+    });
+
+    const imageUrl = response.data?.[0]?.url;
+    console.log(`✅ Image generated: ${imageUrl ? "Success" : "Failed"}`);
+    return imageUrl;
+  } catch (error) {
+    console.warn(`⚠️ Failed to generate hobby image for ${hobby}:`, error);
+    return undefined;
+  }
+}
+
 export async function generateLearningPlan(
   hobby: string,
   goal: string,
   dailyMinutes: number
 ): Promise<LearningPlan> {
-  const allTechniques = await runArchitectStage(hobby, goal);
+  const architectResponse = await runArchitectStage(hobby, goal);
 
   const { selectedTechniques, reasoning, progressionPath } = await runFilterStage(
     hobby,
     goal,
     dailyMinutes,
-    allTechniques
+    architectResponse.techniques
   );
 
-  const techniquesWithResources = await Promise.all(
+  const depthLevel: DepthLevel =
+    dailyMinutes <= 20
+      ? "basic"
+      : dailyMinutes <= 40
+      ? "intermediate"
+      : "deep";
+
+  const techniquesWithQuizzes = await Promise.all(
     selectedTechniques.map(async (technique, index) => {
-      const resources = await runResearcherStage(technique);
+      let quizQuestions;
+      try {
+        quizQuestions = await runQuizGeneratorStage(
+          technique.name,
+          technique.description,
+          technique.whyItMatters
+        );
+      } catch (error) {
+        console.warn(`Failed to generate quiz for ${technique.name}, using fallback`);
+        quizQuestions = undefined;
+      }
 
-      const depthLevel =
-        dailyMinutes <= 20
-          ? "basic"
-          : dailyMinutes <= 40
-          ? "intermediate"
-          : "deep";
-
-      const techWithResources: Technique = {
+      return {
         id: generateId(),
         name: technique.name,
         description: technique.description,
         whyItMatters: technique.whyItMatters,
         estimatedMinutes: technique.depthLevels[depthLevel].estimatedMinutes,
         depthLevel,
-        masteryState: "unstarted",
-        resources,
+        masteryState: "unstarted" as const,
+        resources: [],
         prerequisites: technique.prerequisites,
         order: index,
+        youtubeQuery: technique.youtubeQuery || `${technique.name} ${hobby} tutorial beginner`,
+        quizQuestions,
+        practiceResource: technique.practiceResource,
       };
-
-      return techWithResources;
     })
   );
+
+  const hobbyImageUrl = await generateHobbyImage(hobby);
 
   const plan: LearningPlan = {
     id: generateId(),
     hobby,
     goal,
     dailyMinutes,
-    techniques: techniquesWithResources,
+    techniques: techniquesWithQuizzes,
     reasoning: `${reasoning}\n\nProgression: ${progressionPath}`,
     createdAt: Date.now(),
     updatedAt: Date.now(),
+    isTimerUseful: architectResponse.isTimerUseful,
+    timerRationale: architectResponse.timerRationale,
+    freeResourcesUrl: architectResponse.freeResourcesUrl,
+    freeResourcesDescription: architectResponse.freeResourcesDescription,
+    hobbyImageUrl,
   };
 
   return plan;
