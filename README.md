@@ -1,36 +1,185 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Learn8
+
+Learn8 helps users learn a hobby by mastering only the most impactful 5-8 techniques, intentionally avoiding information overload.
+
+## Core Principles
+
+- **Replace, don't add** - users cannot grow the plan arbitrarily
+- **Mastery over consumption** - focus on doing, not just watching
+- **AI must be explainable** - see why each technique was chosen
+- **Calm, friendly UI** - non-overwhelming experience
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **Components**: Radix UI primitives, custom components
+- **Animations**: Framer Motion
+- **State**: Zustand
+- **Mobile**: Vaul (bottom sheets)
+- **AI**: OpenAI SDK with structured outputs (Zod)
+- **Storage**: IndexedDB (idb-keyval) for local-first architecture
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20.19+ or 22.12+
+- npm 10+
+
+### Installation
+
+```bash
+npm install
+```
+
+### Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` file:
 
-## Learn More
+```
+OPENAI_API_KEY=your-api-key-here
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Core Domains
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+  types/          - Zod schemas and TypeScript types
+  stores/         - Zustand stores (learningPlan, sync, ui)
+  lib/
+    llm/          - LLM pipeline (architect, filter, researcher)
+    sync/         - Local-first sync engine
+    utils.ts      - Utility functions
+  components/
+    ui/           - Base UI components
+    layout/       - Header, navigation
+    technique/    - Technique cards, mastery path
+    modals/       - Replace, reasoning, decomposition
+    commitment/   - Daily time commitment dial
+    onboarding/   - Plan creation flow
+    reader/       - Anti-rabbit-hole focused reader
+  hooks/          - Custom React hooks
+  app/            - Next.js App Router pages
+```
 
-## Deploy on Vercel
+### LLM Pipeline
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The LLM usage follows a multi-stage pipeline:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Architect Stage** - Generate ~20 possible techniques for a hobby
+2. **Filter Stage** - Select the best 5-8 techniques based on time/goal constraints
+3. **Researcher Stage** - Attach 1-2 focused resources per technique
+
+All outputs are validated with Zod schemas.
+
+### State Management
+
+Uses Zustand with small, focused stores:
+
+- `learningPlanStore` - Current learning plan and techniques
+- `syncStore` - Offline action queue
+- `uiStore` - UI state (modals, reader, preferences)
+
+### Local-First Architecture
+
+- All user actions are optimistic (UI updates immediately)
+- Actions are queued for sync when offline
+- Uses IndexedDB via idb-keyval for persistence
+
+## Performance Decisions
+
+- Dynamic imports for heavy components (LLM UI, SVG visualizations)
+- Lazy-loading of Framer Motion animations
+- Minimal bundle size with tree-shaking
+- CSS-first animations where possible
+
+## Testing
+
+### Unit Tests
+
+```bash
+npm test
+```
+
+### E2E Tests
+
+```bash
+npm run test:e2e
+```
+
+Tests include:
+- Mobile bottom-sheet replace flow
+- Learning plan state machine
+
+## Features
+
+### Interactive Mastery Path
+
+SVG-based visualization of learning progress with:
+- Desktop: zig-zag/constellation layout
+- Mobile: vertical stepper
+
+### Atomic Mastery Tracking
+
+Four states per technique:
+- Unstarted
+- Learning
+- Practicing
+- Mastered
+
+### Replace-Not-Add Flow
+
+Users can only replace or decompose techniques, never add more:
+- Desktop: Modal/side panel
+- Mobile: Bottom sheet
+
+### Anti-Rabbit-Hole Mode
+
+Focused reader view with:
+- Session time tracking
+- "I've learned enough" CTA
+- Gentle warnings for long sessions
+
+### Commitment Dial
+
+Adjustable 10-60 min/day slider that adapts technique depth:
+- Basic (10-20 min)
+- Intermediate (20-40 min)
+- Deep (40-60 min)
+
+## Design System
+
+### Colors
+
+Soft pastel palette:
+- Lavender: #E6E0F8
+- Peach: #FFE5D9
+- Mint: #D4F5E9
+- Sky: #D6EEFF
+- Warm Yellow: #FFF4CC
+- Accent: #8B7FD4
+
+### Typography
+
+- Display: Nunito (headings)
+- Body: DM Sans
+
+### Components
+
+Rounded corners (12-20px), soft shadows, subtle gradients.
+
+## License
+
+MIT
