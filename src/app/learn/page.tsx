@@ -95,7 +95,7 @@ export default function LearnPage() {
     if (!technique) return;
     updateQuizScore(technique.id, score);
     if (score >= 80) {
-      setActiveTab("practice");
+      setActiveTab("flashcards");
     }
   }, [technique, updateQuizScore]);
 
@@ -297,8 +297,8 @@ export default function LearnPage() {
                         <Button variant="outline" onClick={() => setActiveTab("learn")}>
                           Review Material
                         </Button>
-                        <Button onClick={() => setActiveTab("practice")}>
-                          Start Practice
+                        <Button onClick={() => setActiveTab("flashcards")}>
+                          Continue to Cards
                         </Button>
                       </div>
                     </div>
@@ -403,17 +403,11 @@ export default function LearnPage() {
                   <div className="mt-6 flex justify-center">
                     <Button 
                       variant="outline" 
-                      onClick={() => {
-                        if (technique.masteryState === "practicing") {
-                          handleMarkMastered();
-                        } else {
-                          updateTechniqueMastery(technique.id, "practicing");
-                        }
-                      }}
+                      onClick={handleMarkMastered}
                       className="gap-2"
                     >
                       <CheckCircle2 className="w-4 h-4" />
-                      {technique.masteryState === "practicing" ? "Mark as Mastered" : "Finish Practice"}
+                      Mark as Mastered
                     </Button>
                   </div>
 

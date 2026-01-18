@@ -17,7 +17,7 @@ export async function searchYouTubeVideos(query: string, maxResults: number = 5)
   }
 
   try {
-    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=${maxResults * 3}&order=rating&videoDuration=medium&key=${apiKey}`;
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=${maxResults * 3}&order=relevance&videoDuration=medium&key=${apiKey}`;
     const searchResponse = await fetch(searchUrl);
     
     if (!searchResponse.ok) {

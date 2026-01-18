@@ -8,6 +8,7 @@ RULES:
 5. Be specific - avoid vague or generic techniques
 6. Include timer usefulness analysis and practice resources
 7. Generate quiz questions that test understanding
+8. CRITICAL: Create highly specific YouTube search queries that will find the EXACT technique being taught, not generic hobby videos
 
 OUTPUT FORMAT:
 Return a JSON object with the following structure:
@@ -36,7 +37,7 @@ Return a JSON object with the following structure:
       },
       "prerequisites": ["id-of-prerequisite"],
       "difficulty": 5,
-      "youtubeQuery": "specific youtube search query for this technique (optional)",
+      "youtubeQuery": "REQUIRED: Very specific youtube search query for this technique. Include the hobby name, technique name, and 'tutorial' or 'how to'. Example: 'guitar fingerpicking technique tutorial beginner' or 'swimming freestyle breathing technique how to'",
       "practiceResource": {
         "name": "Free site or tool name",
         "url": "https://example.com",
@@ -152,7 +153,23 @@ export function createArchitectPrompt(hobby: string, goal: string): string {
 
 User's goal: ${goal}
 
-Focus on practical, actionable techniques that can be learned and practiced. Avoid theoretical-only content.`;
+Focus on practical, actionable techniques that can be learned and practiced. Avoid theoretical-only content.
+
+IMPORTANT: For each technique's youtubeQuery field, create a VERY SPECIFIC search query that will find videos teaching EXACTLY that technique. Include:
+- The hobby name (e.g., "${hobby}")
+- The specific technique name
+- Keywords like "tutorial", "how to", "lesson", or "technique"
+- Target level if relevant (e.g., "beginner", "intermediate")
+
+Example good queries:
+- "${hobby.toLowerCase()} [specific technique name] tutorial for beginners"
+- "how to [specific technique name] ${hobby.toLowerCase()} step by step"
+- "${hobby.toLowerCase()} [specific technique name] lesson explained"
+
+Bad queries (too generic):
+- "${hobby} tutorial"
+- "learn ${hobby}"
+- "${hobby} basics"`;
 }
 
 export function createFilterPrompt(
@@ -203,7 +220,12 @@ Break this down into 2-4 complete sub-techniques that:
 2. Build the skills needed for the original technique
 3. Can be practiced independently
 4. Have clear, specific names (not just "Step 1", "Step 2")
-5. Include specific YouTube search queries and practice resources
+5. Include HIGHLY SPECIFIC YouTube search queries that target the exact sub-technique
+
+For youtubeQuery, create searches like:
+- "how to [sub-technique] ${hobby.toLowerCase()} tutorial"
+- "${hobby.toLowerCase()} [sub-technique] for beginners step by step"
+- "[sub-technique] ${hobby.toLowerCase()} technique explained"
 
 Make this accessible and encouraging for someone who is struggling.`;
 }

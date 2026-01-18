@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Public_Sans, Lora } from "next/font/google";
+import "regenerator-runtime/runtime";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme";
 

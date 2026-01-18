@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, Circle, Loader2 } from "lucide-react";
+import { CheckCircle2, Circle } from "lucide-react";
 import type { Technique, MasteryState } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -13,8 +13,8 @@ interface MasteryPathProps {
 
 const stateIcons: Record<MasteryState, typeof Circle> = {
   unstarted: Circle,
-  learning: Loader2,
-  practicing: Loader2,
+  learning: Circle,
+  practicing: Circle,
   mastered: CheckCircle2,
 };
 
@@ -61,13 +61,7 @@ export function MasteryPath({ techniques, onSelectTechnique, selectedId }: Maste
                     isSelected && "scale-110"
                   )}
                 >
-                  <Icon
-                    className={cn(
-                      "h-4 w-4",
-                      technique.masteryState === "learning" && "animate-spin",
-                      technique.masteryState === "practicing" && "animate-pulse"
-                    )}
-                  />
+                  <Icon className="h-4 w-4" />
                 </div>
 
                 <div className="flex-1 min-w-0">

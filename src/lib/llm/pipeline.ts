@@ -269,7 +269,7 @@ export async function generateLearningPlan(
         resources: [],
         prerequisites: technique.prerequisites,
         order: index,
-        youtubeQuery: technique.youtubeQuery || `${technique.name} ${hobby} tutorial beginner`,
+        youtubeQuery: technique.youtubeQuery || `how to ${technique.name.toLowerCase()} ${hobby.toLowerCase()} tutorial for beginners`,
         quizQuestions,
         practiceResource: technique.practiceResource,
       };
@@ -310,35 +310,52 @@ export async function runTeachBackAnalysisStage(
 }> {
   const openai = getOpenAIClient();
 
-  const systemPrompt = `You are an expert educator analyzing a student's explanation of a concept they're learning.
+  const systemPrompt = `You are an expert educator and mentor analyzing a student's explanation using the "teach-back" method.
 
-Your task is to:
-1. Evaluate how well the student understands the technique
-2. Identify what they explained well (strengths)
-3. Identify what they missed or could improve (improvements)
-4. Give an overall assessment
+The teach-back method is a powerful learning technique where students explain concepts in their own words to demonstrate understanding.
 
-Provide constructive, encouraging feedback that helps them improve their understanding.`;
+Your role is to:
+1. Assess the depth and accuracy of their understanding
+2. Identify what they explained particularly well
+3. Point out missing concepts, misconceptions, or areas needing clarification
+4. Provide encouraging, actionable feedback that motivates continued learning
+
+Be specific, constructive, and supportive. Remember that teaching back is a learning process, not a test.`;
 
   const userPrompt = `The student is learning: ${techniqueName}
 
 Official description: ${techniqueDescription}
 
-Student's explanation:
-${userExplanation}
+Here is the student's teach-back explanation:
+"${userExplanation}"
 
-Analyze their explanation and provide:
-1. A score from 1-10 (where 10 is expert-level understanding)
-2. 2-3 specific strengths in their explanation
-3. 2-3 specific areas to improve or concepts they missed
-4. An overall encouraging assessment (2-3 sentences)
+Analyze their explanation thoroughly and provide detailed feedback:
 
-Respond in JSON format:
+1. SCORE (1-10):
+   - 1-3: Minimal understanding, significant gaps
+   - 4-5: Basic grasp but major concepts missing
+   - 6-7: Good understanding with some gaps
+   - 8-9: Strong understanding, minor improvements possible
+   - 10: Expert-level explanation
+
+2. STRENGTHS (2-4 specific points):
+   What concepts did they explain well? What teaching techniques did they use effectively?
+   Be specific about what worked in their explanation.
+
+3. AREAS TO ENHANCE (2-4 specific points):
+   What key concepts are missing? What could be clarified or expanded?
+   What analogies or examples could help? Be constructive and specific.
+
+4. OVERALL ASSESSMENT (2-3 sentences):
+   Give encouraging feedback that acknowledges their effort, highlights their progress,
+   and motivates them to deepen their understanding.
+
+Respond ONLY in valid JSON format:
 {
-  "score": number,
-  "strengths": ["strength 1", "strength 2", ...],
-  "improvements": ["improvement 1", "improvement 2", ...],
-  "overall": "overall assessment"
+  "score": <number between 1-10>,
+  "strengths": ["specific strength 1", "specific strength 2", ...],
+  "improvements": ["specific improvement 1", "specific improvement 2", ...],
+  "overall": "encouraging overall assessment"
 }`;
 
   const completion = await openai.chat.completions.create({
