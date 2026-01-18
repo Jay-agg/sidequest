@@ -16,6 +16,7 @@ const RequestSchema = z.object({
     prerequisites: z.array(z.string()),
     order: z.number(),
   }),
+  hobby: z.string(),
 });
 
 export async function POST(request: NextRequest) {
@@ -23,9 +24,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = RequestSchema.parse(body);
 
-    const microSteps = await runDecompositionStage(validated.technique as Technique);
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json(
+        { success: false, error: "AI service not configured" },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({ success: true, microSteps });
+    console.log(`🔧 Decomposing technique: ${validated.technique.name}`);
+    const result = await runDecompositionStage(validated.technique as Technique, validated.hobby);
+
+    console.log(`✅ Generated ${result.subTechniques.length} sub-techniques`);
+    return NextResponse.json({ success: true, ...result });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -34,9 +44,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error("Error decomposing technique:", error);
+    console.error("❌ Error decomposing technique:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to decompose technique" },
+      { success: false, error: "Failed to decompose technique. Please try again." },
       { status: 500 }
     );
   }

@@ -105,15 +105,35 @@ export async function runResearcherStage(
 }
 
 export async function runDecompositionStage(
-  technique: Technique
-): Promise<string[]> {
-  const prompt = createDecompositionPrompt(technique.name, technique.description);
+  technique: Technique,
+  hobby: string
+): Promise<{
+  subTechniques: Array<{
+    name: string;
+    description: string;
+    whyItMatters: string;
+    estimatedMinutes: number;
+    youtubeQuery: string;
+    practiceResource?: {
+      name: string;
+      url: string;
+      description: string;
+    };
+  }>;
+  reasoning: string;
+}> {
+  const prompt = createDecompositionPrompt(
+    technique.name,
+    technique.description,
+    technique.whyItMatters,
+    hobby
+  );
   const response = await callLLM(DECOMPOSITION_SYSTEM_PROMPT, prompt);
 
   const parsed = JSON.parse(response);
   const validated = DecompositionResponseSchema.parse(parsed);
 
-  return validated.microSteps;
+  return validated;
 }
 
 export async function runQuizGeneratorStage(
@@ -146,8 +166,27 @@ export async function generateHobbyImage(hobby: string): Promise<string | undefi
     });
 
     const imageUrl = response.data?.[0]?.url;
-    console.log(`✅ Image generated: ${imageUrl ? "Success" : "Failed"}`);
-    return imageUrl;
+    if (!imageUrl) {
+      console.warn(`⚠️ No image URL returned from DALL-E`);
+      return undefined;
+    }
+
+    console.log(`📥 Downloading image and converting to base64...`);
+    
+    // Download the image
+    const imageResponse = await fetch(imageUrl);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to download image: ${imageResponse.statusText}`);
+    }
+
+    // Convert to base64
+    const arrayBuffer = await imageResponse.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const base64 = buffer.toString('base64');
+    const dataUrl = `data:image/png;base64,${base64}`;
+
+    console.log(`✅ Image converted to base64 (${(base64.length / 1024).toFixed(1)}KB)`);
+    return dataUrl;
   } catch (error) {
     console.warn(`⚠️ Failed to generate hobby image for ${hobby}:`, error);
     return undefined;
@@ -223,6 +262,7 @@ export async function generateLearningPlan(
     freeResourcesUrl: architectResponse.freeResourcesUrl,
     freeResourcesDescription: architectResponse.freeResourcesDescription,
     hobbyImageUrl,
+    motivationalQuotes: architectResponse.motivationalQuotes,
   };
 
   return plan;

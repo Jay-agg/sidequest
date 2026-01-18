@@ -17,7 +17,7 @@ export async function searchYouTubeVideos(query: string, maxResults: number = 5)
   }
 
   try {
-    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=${maxResults}&key=${apiKey}`;
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=${maxResults * 3}&order=rating&videoDuration=medium&key=${apiKey}`;
     const searchResponse = await fetch(searchUrl);
     
     if (!searchResponse.ok) {
@@ -33,7 +33,16 @@ export async function searchYouTubeVideos(query: string, maxResults: number = 5)
       return [];
     }
 
-    const videoIds = searchData.items.map((item: { id: { videoId: string } }) => item.id.videoId).join(",");
+    const seenChannels = new Set<string>();
+    const diverseVideos = searchData.items.filter((item: { snippet: { channelId: string } }) => {
+      if (seenChannels.has(item.snippet.channelId)) {
+        return false;
+      }
+      seenChannels.add(item.snippet.channelId);
+      return true;
+    }).slice(0, maxResults);
+
+    const videoIds = diverseVideos.map((item: { id: { videoId: string } }) => item.id.videoId).join(",");
     
     const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIds}&key=${apiKey}`;
     const detailsResponse = await fetch(detailsUrl);

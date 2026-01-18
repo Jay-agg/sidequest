@@ -6,6 +6,7 @@ export const ArchitectResponseSchema = z.object({
   timerRationale: z.string(),
   freeResourcesUrl: z.string().optional(),
   freeResourcesDescription: z.string().optional(),
+  motivationalQuotes: z.array(z.string()).min(5).max(8),
   techniques: z.array(
     z.object({
       id: z.string(),
@@ -68,8 +69,21 @@ export const ResearcherResponseSchema = z.object({
 });
 
 export const DecompositionResponseSchema = z.object({
-  microSteps: z.array(z.string()),
-  simplifiedApproach: z.string(),
+  subTechniques: z.array(
+    z.object({
+      name: z.string(),
+      description: z.string(),
+      whyItMatters: z.string(),
+      estimatedMinutes: z.number(),
+      youtubeQuery: z.string(),
+      practiceResource: z.object({
+        name: z.string(),
+        url: z.string(),
+        description: z.string(),
+      }).optional(),
+    })
+  ).min(2).max(4),
+  reasoning: z.string(),
 });
 
 export const QuizGeneratorResponseSchema = z.object({

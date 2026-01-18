@@ -17,6 +17,7 @@ import type { MasteryState } from "@/types";
 function LearningDashboard() {
   const plan = useLearningPlanStore((state) => state.plan);
   const updateTechniqueMastery = useLearningPlanStore((state) => state.updateTechniqueMastery);
+  const isTechniqueLocked = useLearningPlanStore((state) => state.isTechniqueLocked);
   
   const progress = useMemo(() => {
     if (!plan) return { completed: 0, total: 0, percentage: 0 };
@@ -60,7 +61,7 @@ function LearningDashboard() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8 rounded-3xl overflow-hidden shadow-lg"
+              className="mb-8 rounded-3xl overflow-hidden border-[3px] border-card-border"
             >
               <div className="relative aspect-[21/9] sm:aspect-[21/7]">
                 <img
@@ -68,21 +69,34 @@ function LearningDashboard() {
                   alt={`${plan.hobby} learning journey`}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-                  <h1 className="font-display text-3xl sm:text-4xl font-bold text-white mb-2 drop-shadow-lg">
-                    Your {plan.hobby} Journey
-                  </h1>
-                  <p className="text-white/90 text-sm sm:text-base drop-shadow-md">
-                    {plan.techniques.length} techniques to master
-                  </p>
+                
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                
+                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 flex items-end justify-between gap-4">
+                  <div>
+                    <h1 className="font-display text-3xl sm:text-4xl font-bold text-white mb-2 drop-shadow-lg">
+                      Your {plan.hobby} Journey
+                    </h1>
+                    <p className="text-white/90 text-sm sm:text-base drop-shadow-md">
+                      {plan.techniques.length} techniques to master
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={openReasoningModal}
+                    className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 backdrop-blur-sm"
+                  >
+                    <Lightbulb className="h-4 w-4" />
+                    <span className="hidden sm:inline">Why this plan?</span>
+                    <span className="sm:hidden">Why?</span>
+                  </Button>
                 </div>
               </div>
             </motion.div>
           )}
 
-          <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${plan.hobbyImageUrl ? 'mb-6' : 'mb-8'}`}>
-            {!plan.hobbyImageUrl && (
+          {!plan.hobbyImageUrl && (
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
               <div>
                 <h1 className="font-display text-3xl font-bold text-foreground mb-1">
                   Your {plan.hobby} Journey
@@ -91,12 +105,12 @@ function LearningDashboard() {
                   {plan.techniques.length} techniques to master
                 </p>
               </div>
-            )}
-            <Button variant="outline" onClick={openReasoningModal} className={plan.hobbyImageUrl ? 'ml-auto' : ''}>
-              <Lightbulb className="h-4 w-4" />
-              Why this plan?
-            </Button>
-          </div>
+              <Button variant="outline" onClick={openReasoningModal}>
+                <Lightbulb className="h-4 w-4" />
+                Why this plan?
+              </Button>
+            </div>
+          )}
 
           <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4 mb-8">
             <Card>
@@ -180,6 +194,7 @@ function LearningDashboard() {
                       <TechniqueCard
                         technique={technique}
                         isActive={technique.id === nextTechnique?.id}
+                        isLocked={isTechniqueLocked(technique.id)}
                         onStart={() => handleStart(technique.id)}
                         onUpdateMastery={(state) =>
                           handleUpdateMastery(technique.id, state)

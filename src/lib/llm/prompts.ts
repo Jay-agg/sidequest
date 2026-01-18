@@ -17,6 +17,11 @@ Return a JSON object with the following structure:
   "timerRationale": "Why a timer is/isn't useful for this hobby",
   "freeResourcesUrl": "https://example.com/free-practice-resource",
   "freeResourcesDescription": "Description of the free resource site",
+  "motivationalQuotes": [
+    "Inspiring quote related to the hobby",
+    "Another motivational quote",
+    "5-8 total quotes that encourage practice and mastery"
+  ],
   "techniques": [
     {
       "id": "unique-id",
@@ -89,19 +94,34 @@ Return a JSON object with:
   ]
 }`;
 
-export const DECOMPOSITION_SYSTEM_PROMPT = `You are a learning facilitator who breaks down complex techniques into manageable micro-steps.
+export const DECOMPOSITION_SYSTEM_PROMPT = `You are a learning facilitator who breaks down complex techniques into smaller, more manageable sub-techniques that can be learned independently.
 
 RULES:
-1. Break the technique into 3-5 micro-steps
-2. Each step should be achievable in 5-10 minutes
-3. Steps should build on each other logically
-4. Include clear success criteria for each step
+1. Break the technique into 2-4 complete sub-techniques (not just steps)
+2. Each sub-technique should be a learnable skill on its own
+3. Sub-techniques should build on each other logically
+4. Each should have its own practice resources and YouTube search queries
+5. Make them specific and actionable, not vague
+6. Consider the learner's current level and make it accessible
 
 OUTPUT FORMAT:
 Return a JSON object with:
 {
-  "microSteps": ["Step 1: ...", "Step 2: ...", ...],
-  "simplifiedApproach": "A gentler way to approach this technique"
+  "subTechniques": [
+    {
+      "name": "Specific sub-technique name",
+      "description": "What this sub-technique involves",
+      "whyItMatters": "Why learning this sub-technique is important",
+      "estimatedMinutes": 20,
+      "youtubeQuery": "specific youtube search for this sub-technique",
+      "practiceResource": {
+        "name": "Free site or tool name",
+        "url": "https://example.com",
+        "description": "What you can practice here"
+      }
+    }
+  ],
+  "reasoning": "Brief explanation of why this breakdown makes the original technique more approachable"
 }`;
 
 export const QUIZ_GENERATOR_SYSTEM_PROMPT = `You are an educational assessment expert who creates effective quiz questions to test understanding of learning techniques.
@@ -165,13 +185,27 @@ Focus on resources that are:
 - Appropriate for beginners`;
 }
 
-export function createDecompositionPrompt(techniqueName: string, techniqueDescription: string): string {
-  return `Break down this technique into simpler micro-steps:
+export function createDecompositionPrompt(
+  techniqueName: string,
+  techniqueDescription: string,
+  whyItMatters: string,
+  hobby: string
+): string {
+  return `A learner is finding this technique too challenging and needs it broken down into smaller, more manageable sub-techniques.
 
-Technique: ${techniqueName}
+Hobby: ${hobby}
+Current Technique: ${techniqueName}
 Description: ${techniqueDescription}
+Why It Matters: ${whyItMatters}
 
-The user found this technique too difficult. Create a gentler learning path.`;
+Break this down into 2-4 complete sub-techniques that:
+1. Are easier to learn than the original technique
+2. Build the skills needed for the original technique
+3. Can be practiced independently
+4. Have clear, specific names (not just "Step 1", "Step 2")
+5. Include specific YouTube search queries and practice resources
+
+Make this accessible and encouraging for someone who is struggling.`;
 }
 
 export function createQuizPrompt(techniqueName: string, techniqueDescription: string, whyItMatters: string): string {

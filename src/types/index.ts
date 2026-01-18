@@ -80,6 +80,7 @@ export const LearningPlanSchema = z.object({
   freeResourcesUrl: z.string().optional(),
   freeResourcesDescription: z.string().optional(),
   hobbyImageUrl: z.string().optional(),
+  motivationalQuotes: z.array(z.string()).optional(),
 });
 
 export type LearningPlan = z.infer<typeof LearningPlanSchema>;

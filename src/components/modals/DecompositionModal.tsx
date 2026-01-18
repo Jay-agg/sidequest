@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Layers, Loader2 } from "lucide-react";
+import { Layers, Loader2, CheckCircle2, Clock, BookOpen } from "lucide-react";
 import { useUIStore, useLearningPlanStore } from "@/stores";
 import {
   Dialog,
@@ -20,117 +20,205 @@ import {
   CardContent,
 } from "@/components/ui";
 
+interface SubTechnique {
+  name: string;
+  description: string;
+  whyItMatters: string;
+  estimatedMinutes: number;
+  youtubeQuery: string;
+  practiceResource?: {
+    name: string;
+    url: string;
+    description: string;
+  };
+}
+
 export function DecompositionModal() {
   const isMobile = useUIStore((state) => state.isMobile);
   const { isOpen, techniqueId } = useUIStore((state) => state.modals.decompositionModal);
   const closeModal = useUIStore((state) => state.closeDecompositionModal);
+  const plan = useLearningPlanStore((state) => state.plan);
   const technique = useLearningPlanStore((state) =>
     techniqueId ? state.getTechniqueById(techniqueId) : undefined
   );
-  const decomposeTechnique = useLearningPlanStore((state) => state.decomposeTechnique);
+  const addSubTechniques = useLearningPlanStore((state) => state.addSubTechniques);
 
   const [isDecomposing, setIsDecomposing] = useState(false);
-  const [microSteps, setMicroSteps] = useState<string[]>([]);
+  const [subTechniques, setSubTechniques] = useState<SubTechnique[]>([]);
+  const [reasoning, setReasoning] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const handleDecompose = async () => {
-    if (!techniqueId) return;
+    if (!technique || !plan) return;
 
     setIsDecomposing(true);
+    setError(null);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const response = await fetch("/api/decompose", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          technique,
+          hobby: plan.hobby,
+        }),
+      });
 
-    const generatedSteps = [
-      "Start with the most basic form of the technique",
-      "Practice the core movement for 5 minutes daily",
-      "Add one variation once comfortable",
-      "Combine with related techniques gradually",
-    ];
+      const data = await response.json();
 
-    setMicroSteps(generatedSteps);
-    setIsDecomposing(false);
+      if (!data.success) {
+        throw new Error(data.error || "Failed to decompose technique");
+      }
+
+      setSubTechniques(data.subTechniques);
+      setReasoning(data.reasoning);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to break down technique");
+    } finally {
+      setIsDecomposing(false);
+    }
   };
 
   const handleConfirm = () => {
-    if (!techniqueId || microSteps.length === 0) return;
+    if (!techniqueId || subTechniques.length === 0) return;
 
-    decomposeTechnique(techniqueId, microSteps);
-    setMicroSteps([]);
+    addSubTechniques(techniqueId, subTechniques);
+    setSubTechniques([]);
+    setReasoning("");
     closeModal();
   };
 
   const handleCancel = () => {
-    setMicroSteps([]);
+    setSubTechniques([]);
+    setReasoning("");
+    setError(null);
     closeModal();
   };
 
   const DecompositionContent = () => (
-    <div className="space-y-4">
-      {technique && (
-        <Card className="bg-lavender/20">
-          <CardContent className="p-4">
-            <p className="text-sm text-foreground-muted mb-1">Current technique</p>
-            <p className="font-display font-semibold text-foreground">{technique.name}</p>
-          </CardContent>
-        </Card>
-      )}
+    <>
+      <div className="space-y-4 overflow-y-auto max-h-[50vh] sm:max-h-[60vh] pr-2">
+        {technique && (
+          <Card className="bg-lavender/20 border-lavender/30">
+            <CardContent className="p-4">
+              <p className="text-xs text-foreground-muted mb-1">Current technique</p>
+              <p className="font-display font-semibold text-foreground">{technique.name}</p>
+            </CardContent>
+          </Card>
+        )}
 
-      {microSteps.length === 0 ? (
-        <div className="text-center py-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
-            <Layers className="h-8 w-8 text-accent" />
+        {error && (
+          <Card className="bg-destructive/10 border-destructive/20">
+            <CardContent className="p-4">
+              <p className="text-sm text-destructive">{error}</p>
+              <Button size="sm" variant="outline" onClick={handleDecompose} className="mt-3">
+                Try again
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {subTechniques.length === 0 && !error ? (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
+              <Layers className="h-8 w-8 text-accent" />
+            </div>
+            <p className="text-sm text-foreground-muted mb-4">
+              Finding this technique too challenging? Our AI can break it down into smaller, easier sub-techniques that you can learn one at a time.
+            </p>
+            <Button onClick={handleDecompose} disabled={isDecomposing}>
+              {isDecomposing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <Layers className="h-4 w-4" />
+                  Break it down
+                </>
+              )}
+            </Button>
           </div>
-          <p className="text-sm text-foreground-muted mb-4">
-            Finding this technique too challenging? We can break it down into smaller, more manageable steps.
-          </p>
-          <Button onClick={handleDecompose} disabled={isDecomposing}>
-            {isDecomposing ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Breaking down...
-              </>
-            ) : (
-              <>
-                <Layers className="h-4 w-4" />
-                Break it down
-              </>
+        ) : subTechniques.length > 0 ? (
+          <>
+            {reasoning && (
+              <Card className="bg-sky/10 border-sky/30">
+                <CardContent className="p-4">
+                  <p className="text-sm text-foreground-muted">{reasoning}</p>
+                </CardContent>
+              </Card>
             )}
+
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-foreground">
+                Suggested sub-techniques to learn first:
+              </p>
+              {subTechniques.map((subTech, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card className="border-2 border-card-border hover:border-accent/30 transition-colors">
+                    <CardContent className="p-3">
+                      <div className="flex items-start gap-2">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent/20 text-accent text-xs flex items-center justify-center font-medium">
+                          {index + 1}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-display font-semibold text-foreground text-sm mb-1">
+                            {subTech.name}
+                          </h4>
+                          <p className="text-xs text-foreground-muted mb-2 line-clamp-2">
+                            {subTech.description}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-foreground-muted">
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {subTech.estimatedMinutes} min
+                            </span>
+                            {subTech.practiceResource && (
+                              <span className="flex items-center gap-1">
+                                <BookOpen className="w-3 h-3" />
+                                Resource
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+
+            <Card className="bg-mint/10 border-mint/30">
+              <CardContent className="p-3">
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-foreground">
+                    These will be added to your plan after the current technique.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        ) : null}
+      </div>
+
+      {subTechniques.length > 0 && (
+        <div className="flex flex-col sm:flex-row gap-3 mt-4">
+          <Button variant="outline" className="flex-1" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button className="flex-1" onClick={handleConfirm}>
+            Add to my plan
           </Button>
         </div>
-      ) : (
-        <>
-          <div className="p-4 bg-mint/20 rounded-xl">
-            <p className="text-sm font-medium text-foreground mb-3">
-              Here are simpler steps to master this technique:
-            </p>
-            <ol className="space-y-3">
-              {microSteps.map((step, index) => (
-                <motion.li
-                  key={index}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="flex items-start gap-3"
-                >
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-success text-white text-xs flex items-center justify-center font-medium">
-                    {index + 1}
-                  </span>
-                  <span className="text-sm text-foreground">{step}</span>
-                </motion.li>
-              ))}
-            </ol>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button variant="outline" className="flex-1" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button className="flex-1" onClick={handleConfirm}>
-              Apply these steps
-            </Button>
-          </div>
-        </>
       )}
-    </div>
+    </>
   );
 
   if (isMobile) {
@@ -151,11 +239,11 @@ export function DecompositionModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-3xl w-[90vw]">
         <DialogHeader>
           <DialogTitle>Simplify This Technique</DialogTitle>
           <DialogDescription>
-            Break down complex techniques into manageable steps
+            Break down complex techniques into manageable sub-techniques
           </DialogDescription>
         </DialogHeader>
         <DecompositionContent />

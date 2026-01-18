@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Play, CheckCircle2, RotateCcw, Layers, Clock, ChevronRight, Trophy, Brain } from "lucide-react";
+import { Play, CheckCircle2, RotateCcw, Layers, Clock, ChevronRight, Trophy, Brain, Lock } from "lucide-react";
 import type { Technique, MasteryState } from "@/types";
 import { Button, Card, CardContent, Progress } from "@/components/ui";
 import { cn, formatDuration } from "@/lib/utils";
@@ -16,6 +16,7 @@ interface TechniqueCardProps {
   onReplace: () => void;
   onDecompose: () => void;
   isActive?: boolean;
+  isLocked?: boolean;
 }
 
 const masteryColors: Record<MasteryState, string> = {
@@ -39,6 +40,7 @@ export function TechniqueCard({
   onReplace,
   onDecompose,
   isActive = false,
+  isLocked = false,
 }: TechniqueCardProps) {
   const router = useRouter();
   const setActiveTechnique = useLearningPlanStore((state) => state.setActiveTechnique);
@@ -79,14 +81,15 @@ export function TechniqueCard({
       <Card
         className={cn(
           "relative overflow-hidden transition-all",
-          isActive && "ring-2 ring-accent ring-offset-2 ring-offset-background shadow-lg",
-          isMastered && "bg-mint/5"
+          isActive && "ring-2 ring-accent ring-offset-2 ring-offset-background",
+          isMastered && "bg-mint/5",
+          isLocked && "opacity-60"
         )}
       >
         <div
           className={cn(
             "absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl",
-            masteryColors[technique.masteryState]
+            isLocked ? "bg-muted" : masteryColors[technique.masteryState]
           )}
         />
 
@@ -94,19 +97,26 @@ export function TechniqueCard({
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-2">
-                <span
-                  className={cn(
-                    "px-2.5 py-1 rounded-full text-xs font-medium",
-                    masteryColors[technique.masteryState]
-                  )}
-                >
-                  {masteryLabels[technique.masteryState]}
-                </span>
+                {isLocked ? (
+                  <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-muted flex items-center gap-1">
+                    <Lock className="h-3 w-3" />
+                    Locked
+                  </span>
+                ) : (
+                  <span
+                    className={cn(
+                      "px-2.5 py-1 rounded-full text-xs font-medium",
+                      masteryColors[technique.masteryState]
+                    )}
+                  >
+                    {masteryLabels[technique.masteryState]}
+                  </span>
+                )}
                 <span className="flex items-center gap-1 text-xs text-foreground-muted">
                   <Clock className="h-3 w-3" />
                   {formatDuration(technique.estimatedMinutes)}
                 </span>
-                {technique.quizCompleted && (
+                {technique.quizCompleted && !isLocked && (
                   <span className="flex items-center gap-1 text-xs text-foreground-muted">
                     <Brain className="h-3 w-3" />
                     Quiz: {technique.quizScore}%
@@ -119,10 +129,10 @@ export function TechniqueCard({
               </h3>
 
               <p className="text-sm text-foreground-muted line-clamp-2 mb-3">
-                {technique.whyItMatters}
+                {isLocked ? "Complete the previous technique to unlock this one." : technique.whyItMatters}
               </p>
 
-              {technique.practiceMinutes && technique.practiceMinutes > 0 && !isMastered && (
+              {!isLocked && technique.practiceMinutes && technique.practiceMinutes > 0 && !isMastered && (
                 <div className="mb-3">
                   <div className="flex items-center justify-between text-xs text-foreground-muted mb-1">
                     <span>Practice progress</span>
@@ -151,43 +161,52 @@ export function TechniqueCard({
               )}
 
               <div className="flex flex-wrap items-center gap-2">
-                {technique.masteryState === "unstarted" && (
-                  <Button size="sm" onClick={handleStartLearning}>
-                    <Play className="h-4 w-4" />
-                    Start Learning
+                {isLocked ? (
+                  <Button size="sm" disabled>
+                    <Lock className="h-4 w-4" />
+                    Locked
                   </Button>
-                )}
-
-                {technique.masteryState !== "unstarted" && !isMastered && (
+                ) : (
                   <>
-                    <Button size="sm" onClick={handleContinueLearning}>
-                      <Play className="h-4 w-4" />
-                      Continue
+                    {technique.masteryState === "unstarted" && (
+                      <Button size="sm" onClick={handleStartLearning}>
+                        <Play className="h-4 w-4" />
+                        Start Learning
+                      </Button>
+                    )}
+
+                    {technique.masteryState !== "unstarted" && !isMastered && (
+                      <>
+                        <Button size="sm" onClick={handleContinueLearning}>
+                          <Play className="h-4 w-4" />
+                          Continue
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={handleProgressState}>
+                          <ChevronRight className="h-4 w-4" />
+                          {technique.masteryState === "learning" ? "Mark Practicing" : "Mark Mastered"}
+                        </Button>
+                      </>
+                    )}
+
+                    {isMastered && (
+                      <Button size="sm" variant="outline" className="text-green-500 border-green-500/30" disabled>
+                        <Trophy className="h-4 w-4" />
+                        Mastered
+                      </Button>
+                    )}
+
+                    <Button size="sm" variant="ghost" onClick={onReplace}>
+                      <RotateCcw className="h-4 w-4" />
+                      <span className="hidden sm:inline">Replace</span>
                     </Button>
-                    <Button size="sm" variant="outline" onClick={handleProgressState}>
-                      <ChevronRight className="h-4 w-4" />
-                      {technique.masteryState === "learning" ? "Mark Practicing" : "Mark Mastered"}
-                    </Button>
+
+                    {!isMastered && technique.masteryState !== "unstarted" && (
+                      <Button size="sm" variant="ghost" onClick={onDecompose}>
+                        <Layers className="h-4 w-4" />
+                        <span className="hidden sm:inline">Too Hard</span>
+                      </Button>
+                    )}
                   </>
-                )}
-
-                {isMastered && (
-                  <Button size="sm" variant="outline" className="text-green-500 border-green-500/30" disabled>
-                    <Trophy className="h-4 w-4" />
-                    Mastered
-                  </Button>
-                )}
-
-                <Button size="sm" variant="ghost" onClick={onReplace}>
-                  <RotateCcw className="h-4 w-4" />
-                  <span className="hidden sm:inline">Replace</span>
-                </Button>
-
-                {!isMastered && technique.masteryState !== "unstarted" && (
-                  <Button size="sm" variant="ghost" onClick={onDecompose}>
-                    <Layers className="h-4 w-4" />
-                    <span className="hidden sm:inline">Too Hard</span>
-                  </Button>
                 )}
               </div>
             </div>

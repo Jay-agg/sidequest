@@ -75,7 +75,7 @@ export function VideoPlayer({ query, techniqueName }: VideoPlayerProps) {
         >
           <div className="aspect-video rounded-xl overflow-hidden bg-card border border-card-border">
             <iframe
-              src={selectedVideo.embedUrl}
+              src={`${selectedVideo.embedUrl}?rel=0&modestbranding=1&iv_load_policy=3`}
               title={selectedVideo.title}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -108,7 +108,7 @@ export function VideoPlayer({ query, techniqueName }: VideoPlayerProps) {
       {videos.length > 1 && (
         <div>
           <h4 className="text-sm font-medium text-foreground-muted mb-3">
-            More videos for {techniqueName}
+            More tutorials from top creators
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {videos.slice(1).map((video) => (

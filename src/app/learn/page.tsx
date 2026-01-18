@@ -19,6 +19,7 @@ import {
 import { Button, Card, CardContent, CircularProgress } from "@/components/ui";
 import { useLearningPlanStore } from "@/stores";
 import { Quiz, VideoPlayer, PracticeTimer } from "@/components/learning";
+import { CelebrationModal } from "@/components/modals";
 import type { MasteryState, QuizQuestion } from "@/types";
 
 type Tab = "learn" | "practice" | "quiz";
@@ -56,8 +57,11 @@ export default function LearnPage() {
   const updateTechniqueMastery = useLearningPlanStore((state) => state.updateTechniqueMastery);
   const updateQuizScore = useLearningPlanStore((state) => state.updateQuizScore);
   const logPractice = useLearningPlanStore((state) => state.logPractice);
+  const isTechniqueLocked = useLearningPlanStore((state) => state.isTechniqueLocked);
 
   const [activeTab, setActiveTab] = useState<Tab>("learn");
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebratedTechniqueName, setCelebratedTechniqueName] = useState("");
 
   const technique = useMemo(() => {
     if (!plan) return null;
@@ -73,6 +77,12 @@ export default function LearnPage() {
       router.push("/");
     }
   }, [plan, router]);
+
+  useEffect(() => {
+    if (technique && isTechniqueLocked(technique.id)) {
+      router.push("/");
+    }
+  }, [technique, isTechniqueLocked, router]);
 
   useEffect(() => {
     if (technique && technique.masteryState === "unstarted") {
@@ -96,9 +106,16 @@ export default function LearnPage() {
 
   const handleMarkMastered = useCallback(() => {
     if (!technique) return;
-    updateTechniqueMastery(technique.id, "mastered");
     
-    if (plan) {
+    setCelebratedTechniqueName(technique.name);
+    setShowCelebration(true);
+    updateTechniqueMastery(technique.id, "mastered");
+  }, [technique, updateTechniqueMastery]);
+
+  const handleCelebrationClose = useCallback(() => {
+    setShowCelebration(false);
+    
+    if (plan && technique) {
       const sorted = [...plan.techniques].sort((a, b) => a.order - b.order);
       const nextTech = sorted.find((t) => t.id !== technique.id && t.masteryState !== "mastered");
       if (nextTech) {
@@ -108,7 +125,7 @@ export default function LearnPage() {
         router.push("/");
       }
     }
-  }, [technique, plan, updateTechniqueMastery, setActiveTechnique, router]);
+  }, [plan, technique, setActiveTechnique, router]);
 
   const progress = useMemo(() => {
     if (!plan) return 0;
@@ -222,7 +239,18 @@ export default function LearnPage() {
                 </CardContent>
               </Card>
 
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    updateTechniqueMastery(technique.id, "practicing");
+                    setActiveTab("practice");
+                  }} 
+                  className="gap-2"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  I have learnt enough
+                </Button>
                 <Button onClick={() => setActiveTab("quiz")} className="gap-2">
                   Take the Quiz
                   <ChevronRight className="w-4 h-4" />
@@ -334,6 +362,23 @@ export default function LearnPage() {
                     onComplete={handlePracticeComplete}
                   />
 
+                  <div className="mt-6 flex justify-center">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        if (technique.masteryState === "practicing") {
+                          handleMarkMastered();
+                        } else {
+                          updateTechniqueMastery(technique.id, "practicing");
+                        }
+                      }}
+                      className="gap-2"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      {technique.masteryState === "practicing" ? "Mark as Mastered" : "Finish Practice"}
+                    </Button>
+                  </div>
+
                   {technique.practiceMinutes && technique.practiceMinutes > 0 && (
                     <div className="mt-6 p-4 rounded-xl bg-mint/10 border border-mint/30">
                       <div className="flex items-center gap-3">
@@ -406,6 +451,13 @@ export default function LearnPage() {
           </div>
         </div>
       </div>
+
+      <CelebrationModal
+        isOpen={showCelebration}
+        onClose={handleCelebrationClose}
+        techniqueName={celebratedTechniqueName}
+        motivationalQuotes={plan?.motivationalQuotes}
+      />
     </div>
   );
 }

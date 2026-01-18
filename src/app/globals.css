@@ -34,7 +34,7 @@
   
   --card: #FFFFFF;
   --card-bg: #FFFFFF;
-  --card-border: rgba(139, 127, 212, 0.15);
+  --card-border: rgba(0, 0, 0, 0.15);
   --card-shadow: 0 4px 24px rgba(139, 127, 212, 0.1);
   
   --muted: #F4F4F5;
@@ -87,7 +87,7 @@
   
   --card: #1E1E1E;
   --card-bg: #1E1E1E;
-  --card-border: rgba(165, 153, 233, 0.2);
+  --card-border: rgba(255, 255, 255, 0.15);
   --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   
   --muted: #2A2A2A;
@@ -201,4 +201,16 @@ body {
   
   .font-sans { font-family: var(--font-sans); }
   .font-display { font-family: var(--font-display); }
+  
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
 }
