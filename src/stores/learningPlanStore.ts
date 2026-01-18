@@ -395,7 +395,7 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
       },
     }),
     {
-      name: "learn8-learning-plan",
+      name: "sidequest-learning-plan",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ plan: state.plan, activeTechniqueId: state.activeTechniqueId }),
     }

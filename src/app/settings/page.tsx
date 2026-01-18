@@ -44,7 +44,7 @@ function SettingsContent() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `learn8-${plan.hobby.toLowerCase().replace(/\s+/g, "-")}-plan.json`;
+    a.download = `sidequest-${plan.hobby.toLowerCase().replace(/\s+/g, "-")}-plan.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -74,31 +74,6 @@ function SettingsContent() {
               <CommitmentDial />
             </motion.div>
           )}
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="font-display text-xl font-semibold text-foreground mb-4">
-                  Sync Status
-                </h2>
-                <div className="flex items-center justify-between p-4 bg-lavender/20 rounded-xl">
-                  <div>
-                    <p className="font-medium text-foreground">Pending Actions</p>
-                    <p className="text-sm text-foreground-muted">
-                      Actions waiting to be synced
-                    </p>
-                  </div>
-                  <div className="px-4 py-2 rounded-xl bg-accent/10 text-accent font-semibold">
-                    {pendingCount}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
 
           {plan && (
           <motion.div
@@ -146,11 +121,11 @@ function SettingsContent() {
             <Card>
               <CardContent className="p-6">
                 <h2 className="font-display text-xl font-semibold text-foreground mb-4">
-                  About Learn8
+                  About SideQuest
                 </h2>
                 <div className="space-y-4 text-sm text-foreground-muted">
                   <p>
-                    Learn8 helps you master any hobby by focusing on the most impactful
+                    SideQuest helps you master any hobby by focusing on the most impactful
                     5-8 techniques. No information overload, just focused learning.
                   </p>
                   <p>

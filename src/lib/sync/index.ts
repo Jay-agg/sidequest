@@ -2,8 +2,8 @@ import { get, set, del, keys } from "idb-keyval";
 import type { LearningPlan, SyncAction } from "@/types";
 import { generateId } from "@/lib/utils";
 
-const PLAN_KEY = "learn8-plan";
-const QUEUE_KEY = "learn8-sync-queue";
+const PLAN_KEY = "sidequest-plan";
+const QUEUE_KEY = "sidequest-sync-queue";
 
 export async function savePlanToIndexedDB(plan: LearningPlan): Promise<void> {
   await set(PLAN_KEY, plan);

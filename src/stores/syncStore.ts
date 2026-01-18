@@ -90,7 +90,7 @@ export const useSyncStore = create<SyncStore>()(
       },
     }),
     {
-      name: "learn8-sync-queue",
+      name: "sidequest-sync-queue",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ queue: state.queue, lastSyncedAt: state.lastSyncedAt }),
     }

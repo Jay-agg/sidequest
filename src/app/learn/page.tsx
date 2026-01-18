@@ -243,7 +243,7 @@ export default function LearnPage() {
               </Card>
 
               <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3">
-                <Button 
+                {/* <Button 
                   variant="outline" 
                   onClick={() => {
                     updateTechniqueMastery(technique.id, "practicing");
@@ -253,7 +253,7 @@ export default function LearnPage() {
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   I have learnt enough
-                </Button>
+                </Button> */}
                 <Button onClick={() => setActiveTab("quiz")} className="gap-2">
                   Take the Quiz
                   <ChevronRight className="w-4 h-4" />

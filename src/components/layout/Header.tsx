@@ -39,7 +39,7 @@ export function Header({ className }: HeaderProps) {
             </div>
             <div>
               <h1 className="font-display text-xl font-semibold text-foreground">
-                Learn8
+                SideQuest
               </h1>
               {plan && (
                 <div className="flex items-center gap-2">

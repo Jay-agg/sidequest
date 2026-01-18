@@ -19,9 +19,9 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "Learn8 - Master Any Hobby with Just 5-8 Techniques",
+  title: "SideQuest",
   description:
-    "Learn8 helps you master any hobby by focusing on the most impactful techniques. No information overload, just focused learning.",
+    "SideQuest helps you master any hobby by focusing on the most impactful techniques. No information overload, just focused learning.",
   keywords: ["learning", "hobby", "mastery", "techniques", "focused learning"],
 };
 

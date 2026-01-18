@@ -15,7 +15,7 @@ export const useThemeStore = create<ThemeState>()(
       setTheme: (theme) => set({ theme }),
     }),
     {
-      name: "learn8-theme",
+      name: "sidequest-theme",
       storage: createJSONStorage(() => localStorage),
     }
   )
