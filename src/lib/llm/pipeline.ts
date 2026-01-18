@@ -114,6 +114,12 @@ export async function runDecompositionStage(
     whyItMatters: string;
     estimatedMinutes: number;
     youtubeQuery: string;
+    quizQuestions?: Array<{
+      question: string;
+      options: string[];
+      correctIndex: number;
+      explanation?: string;
+    }>;
     practiceResource?: {
       name: string;
       url: string;
@@ -133,7 +139,31 @@ export async function runDecompositionStage(
   const parsed = JSON.parse(response);
   const validated = DecompositionResponseSchema.parse(parsed);
 
-  return validated;
+  const subTechniquesWithQuizzes = await Promise.all(
+    validated.subTechniques.map(async (subTechnique) => {
+      let quizQuestions;
+      try {
+        quizQuestions = await runQuizGeneratorStage(
+          subTechnique.name,
+          subTechnique.description,
+          subTechnique.whyItMatters
+        );
+      } catch (error) {
+        console.warn(`Failed to generate quiz for sub-technique ${subTechnique.name}`);
+        quizQuestions = undefined;
+      }
+      
+      return {
+        ...subTechnique,
+        quizQuestions,
+      };
+    })
+  );
+
+  return {
+    subTechniques: subTechniquesWithQuizzes,
+    reasoning: validated.reasoning,
+  };
 }
 
 export async function runQuizGeneratorStage(
@@ -266,4 +296,159 @@ export async function generateLearningPlan(
   };
 
   return plan;
+}
+
+export async function runTeachBackAnalysisStage(
+  techniqueName: string,
+  techniqueDescription: string,
+  userExplanation: string
+): Promise<{
+  score: number;
+  strengths: string[];
+  improvements: string[];
+  overall: string;
+}> {
+  const openai = getOpenAIClient();
+
+  const systemPrompt = `You are an expert educator analyzing a student's explanation of a concept they're learning.
+
+Your task is to:
+1. Evaluate how well the student understands the technique
+2. Identify what they explained well (strengths)
+3. Identify what they missed or could improve (improvements)
+4. Give an overall assessment
+
+Provide constructive, encouraging feedback that helps them improve their understanding.`;
+
+  const userPrompt = `The student is learning: ${techniqueName}
+
+Official description: ${techniqueDescription}
+
+Student's explanation:
+${userExplanation}
+
+Analyze their explanation and provide:
+1. A score from 1-10 (where 10 is expert-level understanding)
+2. 2-3 specific strengths in their explanation
+3. 2-3 specific areas to improve or concepts they missed
+4. An overall encouraging assessment (2-3 sentences)
+
+Respond in JSON format:
+{
+  "score": number,
+  "strengths": ["strength 1", "strength 2", ...],
+  "improvements": ["improvement 1", "improvement 2", ...],
+  "overall": "overall assessment"
+}`;
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+    response_format: { type: "json_object" },
+    temperature: 0.7,
+  });
+
+  const content = completion.choices[0]?.message?.content;
+  if (!content) {
+    throw new Error("No response from OpenAI");
+  }
+
+  const feedback = JSON.parse(content);
+  
+  return {
+    score: feedback.score || 5,
+    strengths: feedback.strengths || [],
+    improvements: feedback.improvements || [],
+    overall: feedback.overall || "Good effort! Keep practicing to deepen your understanding.",
+  };
+}
+
+export async function generateOnboardingQuotes(
+  hobby: string
+): Promise<string[]> {
+  const openai = getOpenAIClient();
+
+  const systemPrompt = `You are a motivational coach who generates inspiring, short quotes to encourage people while their learning plan is being created.`;
+
+  const userPrompt = `Generate 5 short, inspiring quotes (max 15 words each) for someone who is about to start learning ${hobby}. 
+
+Make them:
+- Encouraging and positive
+- Specific to ${hobby}
+- Action-oriented
+- Varied in tone (some playful, some profound)
+
+Return as JSON:
+{
+  "quotes": ["quote 1", "quote 2", ...]
+}`;
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+    response_format: { type: "json_object" },
+    temperature: 0.9,
+  });
+
+  const content = completion.choices[0]?.message?.content;
+  if (!content) {
+    throw new Error("No response from OpenAI");
+  }
+
+  const parsed = JSON.parse(content);
+  return parsed.quotes || [];
+}
+
+export async function generateHobbyGradient(
+  hobby: string
+): Promise<{ colors: string[]; animation: string }> {
+  const openai = getOpenAIClient();
+
+  const systemPrompt = `You are a design expert who creates beautiful color gradients based on activities and hobbies.`;
+
+  const userPrompt = `Generate a beautiful gradient color palette for ${hobby}.
+
+Choose 3-4 colors that:
+- Represent the essence and mood of ${hobby}
+- Work well together in a gradient
+- Are vibrant but not overwhelming
+- Use hex color codes
+
+Also suggest an animation style (smooth, wave, pulse, or radial).
+
+Return as JSON:
+{
+  "colors": ["#hex1", "#hex2", "#hex3"],
+  "animation": "smooth"
+}`;
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+    response_format: { type: "json_object" },
+    temperature: 0.8,
+  });
+
+  const content = completion.choices[0]?.message?.content;
+  if (!content) {
+    return {
+      colors: ["#6366f1", "#8b5cf6", "#d946ef"],
+      animation: "smooth",
+    };
+  }
+
+  const parsed = JSON.parse(content);
+  return {
+    colors: parsed.colors || ["#6366f1", "#8b5cf6", "#d946ef"],
+    animation: parsed.animation || "smooth",
+  };
 }

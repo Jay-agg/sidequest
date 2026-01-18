@@ -20,6 +20,16 @@ export function Quiz({ questions, onComplete, techniqueName }: QuizProps) {
   const [completed, setCompleted] = useState(false);
   const [answers, setAnswers] = useState<boolean[]>([]);
 
+  if (!questions || questions.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <p className="text-foreground-muted">No quiz questions available for this technique yet.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const currentQuestion = questions[currentIndex];
   const isCorrect = selectedAnswer === currentQuestion?.correctIndex;
   const score = Math.round((correctCount / questions.length) * 100);

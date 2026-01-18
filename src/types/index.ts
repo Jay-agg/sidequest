@@ -28,6 +28,7 @@ export const QuizQuestionSchema = z.object({
   question: z.string(),
   options: z.array(z.string()).min(2).max(4),
   correctIndex: z.number().min(0).max(3),
+  explanation: z.string().optional(),
 });
 
 export type QuizQuestion = z.infer<typeof QuizQuestionSchema>;

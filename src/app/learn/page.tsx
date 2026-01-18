@@ -20,9 +20,10 @@ import { Button, Card, CardContent, CircularProgress } from "@/components/ui";
 import { useLearningPlanStore } from "@/stores";
 import { Quiz, VideoPlayer, PracticeTimer } from "@/components/learning";
 import { CelebrationModal } from "@/components/modals";
+import { FlashCards, TeachBackMode } from "@/components/gamification";
 import type { MasteryState, QuizQuestion } from "@/types";
 
-type Tab = "learn" | "practice" | "quiz";
+type Tab = "learn" | "practice" | "quiz" | "flashcards" | "teachback";
 
 const masteryLabels: Record<MasteryState, { label: string; color: string }> = {
   unstarted: { label: "Not Started", color: "bg-muted text-foreground-muted" },
@@ -200,16 +201,18 @@ export default function LearnPage() {
           </CardContent>
         </Card>
 
-        <div className="flex gap-1 p-1 mb-6 rounded-xl bg-card border border-card-border">
+        <div className="grid grid-cols-5 gap-1 p-1 mb-6 rounded-xl bg-card border border-card-border overflow-x-auto">
           {[
             { id: "learn" as const, label: "Learn", icon: Play },
             { id: "quiz" as const, label: "Quiz", icon: Brain },
+            { id: "flashcards" as const, label: "Cards", icon: Target },
+            { id: "teachback" as const, label: "Teach", icon: Sparkles },
             { id: "practice" as const, label: "Practice", icon: Timer },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center justify-center gap-2 px-2 sm:px-4 py-3 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                 activeTab === tab.id
                   ? "bg-accent text-accent-foreground"
                   : "text-foreground-muted hover:text-foreground hover:bg-accent/10"
@@ -308,6 +311,41 @@ export default function LearnPage() {
                   )}
                 </CardContent>
               </Card>
+            </motion.div>
+          )}
+
+          {activeTab === "flashcards" && (
+            <motion.div
+              key="flashcards"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <FlashCards
+                questions={quizQuestions}
+                techniqueName={technique.name}
+                onComplete={(correct, total) => {
+                  const score = Math.round((correct / total) * 100);
+                  updateQuizScore(technique.id, score);
+                }}
+              />
+            </motion.div>
+          )}
+
+          {activeTab === "teachback" && (
+            <motion.div
+              key="teachback"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <TeachBackMode
+                technique={technique}
+                onComplete={() => {
+                  updateTechniqueMastery(technique.id, "practicing");
+                  setActiveTab("practice");
+                }}
+              />
             </motion.div>
           )}
 

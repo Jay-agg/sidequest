@@ -32,7 +32,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${publicSans.variable} ${lora.variable}`} suppressHydrationWarning>
       <body className="min-h-screen antialiased">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

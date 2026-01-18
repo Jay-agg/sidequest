@@ -25,6 +25,12 @@ interface LearningPlanActions {
     whyItMatters: string;
     estimatedMinutes: number;
     youtubeQuery: string;
+    quizQuestions?: Array<{
+      question: string;
+      options: string[];
+      correctIndex: number;
+      explanation?: string;
+    }>;
     practiceResource?: { name: string; url: string; description: string };
   }>) => void;
   updateDailyMinutes: (minutes: number) => void;
@@ -164,7 +170,7 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
           prerequisites: index === 0 ? [parentTechniqueId] : [subTechniques[index - 1].name],
           order: parentTechnique.order + 0.1 + (index * 0.01),
           youtubeQuery: subTech.youtubeQuery,
-          quizQuestions: [],
+          quizQuestions: subTech.quizQuestions || [],
           practiceResource: subTech.practiceResource,
         }));
 
