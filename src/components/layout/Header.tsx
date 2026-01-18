@@ -37,21 +37,21 @@ export function Header({ className }: HeaderProps) {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-white">
               <Sparkles className="h-5 w-5" />
             </div>
-            <div>
-              <h1 className="font-display text-xl font-semibold text-foreground">
+            <div className="min-w-0">
+              <h1 className="font-display text-lg sm:text-xl font-semibold text-foreground">
                 SideQuest
               </h1>
               {plan && (
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-foreground-muted">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <p className="text-xs sm:text-sm text-foreground-muted truncate">
                     {plan.hobby}
                   </p>
                   <button
                     onClick={() => router.push("/settings")}
-                    className="text-xs text-foreground-subtle hover:text-accent transition-colors"
+                    className="text-xs text-foreground-subtle hover:text-accent transition-colors flex-shrink-0 p-1"
                     title="Change hobby"
                   >
-                    <Settings className="h-3 w-3" />
+                    <Settings className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   </button>
                 </div>
               )}
@@ -62,8 +62,8 @@ export function Header({ className }: HeaderProps) {
             <ThemeToggle />
             
             {plan && (
-              <div className="hidden sm:flex items-center gap-4">
-                <div className="text-right">
+              <div className="hidden sm:flex items-center gap-3 md:gap-4">
+                <div className="text-right hidden md:block">
                   <p className="text-sm font-medium text-foreground">
                     {progress.completed} of {progress.total} mastered
                   </p>
@@ -71,7 +71,7 @@ export function Header({ className }: HeaderProps) {
                     {plan.dailyMinutes} min/day
                   </p>
                 </div>
-                <CircularProgress value={progress.percentage} size={48} strokeWidth={4} />
+                <CircularProgress value={progress.percentage} size={40} strokeWidth={4} className="sm:w-10 sm:h-10 md:w-12 md:h-12" />
               </div>
             )}
           </div>

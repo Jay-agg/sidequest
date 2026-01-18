@@ -97,21 +97,21 @@ export function DecompositionModal() {
 
   const DecompositionContent = () => (
     <>
-      <div className="space-y-4 overflow-y-auto max-h-[50vh] sm:max-h-[60vh] pr-2">
+      <div className="space-y-3 sm:space-y-4 overflow-y-auto max-h-[50vh] sm:max-h-[60vh] pr-1 sm:pr-2">
         {technique && (
           <Card className="bg-lavender/20 border-lavender/30">
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <p className="text-xs text-foreground-muted mb-1">Current technique</p>
-              <p className="font-display font-semibold text-foreground">{technique.name}</p>
+              <p className="font-display text-sm sm:text-base font-semibold text-foreground break-words">{technique.name}</p>
             </CardContent>
           </Card>
         )}
 
         {error && (
           <Card className="bg-destructive/10 border-destructive/20">
-            <CardContent className="p-4">
-              <p className="text-sm text-destructive">{error}</p>
-              <Button size="sm" variant="outline" onClick={handleDecompose} className="mt-3">
+            <CardContent className="p-3 sm:p-4">
+              <p className="text-xs sm:text-sm text-destructive mb-3">{error}</p>
+              <Button size="sm" variant="outline" onClick={handleDecompose} className="w-full sm:w-auto">
                 Try again
               </Button>
             </CardContent>
@@ -119,14 +119,14 @@ export function DecompositionModal() {
         )}
 
         {subTechniques.length === 0 && !error ? (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
-              <Layers className="h-8 w-8 text-accent" />
+          <div className="text-center py-6 sm:py-8 px-2">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-accent/10 flex items-center justify-center">
+              <Layers className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-accent" />
             </div>
-            <p className="text-sm text-foreground-muted mb-4">
+            <p className="text-xs sm:text-sm text-foreground-muted mb-4">
               Finding this technique too challenging? Our AI can break it down into smaller, easier sub-techniques that you can learn one at a time.
             </p>
-            <Button onClick={handleDecompose} disabled={isDecomposing}>
+            <Button onClick={handleDecompose} disabled={isDecomposing} className="w-full sm:w-auto">
               {isDecomposing ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -144,14 +144,14 @@ export function DecompositionModal() {
           <>
             {reasoning && (
               <Card className="bg-sky/10 border-sky/30">
-                <CardContent className="p-4">
-                  <p className="text-sm text-foreground-muted">{reasoning}</p>
+                <CardContent className="p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-foreground-muted">{reasoning}</p>
                 </CardContent>
               </Card>
             )}
 
-            <div className="space-y-3">
-              <p className="text-sm font-medium text-foreground">
+            <div className="space-y-2 sm:space-y-3">
+              <p className="text-xs sm:text-sm font-medium text-foreground">
                 Suggested sub-techniques to learn first:
               </p>
               {subTechniques.map((subTech, index) => (
@@ -162,19 +162,19 @@ export function DecompositionModal() {
                   transition={{ delay: index * 0.1 }}
                 >
                   <Card className="border-2 border-card-border hover:border-accent/30 transition-colors">
-                    <CardContent className="p-3">
+                    <CardContent className="p-2.5 sm:p-3">
                       <div className="flex items-start gap-2">
-                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent/20 text-accent text-xs flex items-center justify-center font-medium">
+                        <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-accent/20 text-accent text-xs flex items-center justify-center font-medium">
                           {index + 1}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-display font-semibold text-foreground text-sm mb-1">
+                          <h4 className="font-display text-xs sm:text-sm font-semibold text-foreground mb-1 break-words">
                             {subTech.name}
                           </h4>
                           <p className="text-xs text-foreground-muted mb-2 line-clamp-2">
                             {subTech.description}
                           </p>
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-foreground-muted">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-foreground-muted">
                             <span className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
                               {subTech.estimatedMinutes} min

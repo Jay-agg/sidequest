@@ -170,38 +170,38 @@ export default function LearnPage() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6 pb-24">
-        <div className="mb-8">
-          <div className="flex flex-wrap items-center gap-3 mb-3">
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${masteryInfo.color}`}>
+      <main className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-20 sm:pb-24">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+            <span className={`px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium ${masteryInfo.color}`}>
               {masteryInfo.label}
             </span>
-            <span className="text-sm text-foreground-muted">
+            <span className="text-xs sm:text-sm text-foreground-muted">
               Technique {(technique.order || 0) + 1} of {plan.techniques.length}
             </span>
           </div>
 
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-2">
+          <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1.5 sm:mb-2 leading-tight">
             {technique.name}
           </h1>
-          <p className="text-foreground-muted">{technique.description}</p>
+          <p className="text-sm sm:text-base text-foreground-muted">{technique.description}</p>
         </div>
 
-        <Card className="mb-6 bg-lavender/10 border-lavender/30">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-lavender/30 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-5 h-5 text-purple-400" />
+        <Card className="mb-4 sm:mb-6 bg-lavender/10 border-lavender/30">
+          <CardContent className="p-3 sm:p-4 md:p-6">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-lavender/30 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
               </div>
-              <div>
-                <h3 className="font-medium text-foreground mb-1">Why this matters</h3>
-                <p className="text-sm text-foreground-muted">{technique.whyItMatters}</p>
+              <div className="min-w-0">
+                <h3 className="text-sm sm:text-base font-medium text-foreground mb-1">Why this matters</h3>
+                <p className="text-xs sm:text-sm text-foreground-muted">{technique.whyItMatters}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-5 gap-1 p-1 mb-6 rounded-xl bg-card border border-card-border overflow-x-auto">
+        <div className="grid grid-cols-5 gap-0.5 sm:gap-1 p-0.5 sm:p-1 mb-4 sm:mb-6 rounded-lg sm:rounded-xl bg-card border border-card-border overflow-x-auto">
           {[
             { id: "learn" as const, label: "Learn", icon: Play },
             { id: "quiz" as const, label: "Quiz", icon: Brain },
@@ -212,13 +212,13 @@ export default function LearnPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center justify-center gap-2 px-2 sm:px-4 py-3 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+              className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-1 sm:px-2 md:px-4 py-2 sm:py-3 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap min-h-[48px] ${
                 activeTab === tab.id
                   ? "bg-accent text-accent-foreground"
                   : "text-foreground-muted hover:text-foreground hover:bg-accent/10"
               }`}
             >
-              <tab.icon className="w-4 h-4" />
+              <tab.icon className="w-4 h-4 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">{tab.label}</span>
             </button>
           ))}

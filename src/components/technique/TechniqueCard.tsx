@@ -93,19 +93,19 @@ export function TechniqueCard({
           )}
         />
 
-        <CardContent className="p-5 pl-6">
-          <div className="flex items-start justify-between gap-4">
+        <CardContent className="p-4 sm:p-5 sm:pl-6">
+          <div className="flex items-start justify-between gap-3 sm:gap-4">
             <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2 mb-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
                 {isLocked ? (
-                  <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-muted flex items-center gap-1">
+                  <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-xs font-medium bg-muted flex items-center gap-1">
                     <Lock className="h-3 w-3" />
                     Locked
                   </span>
                 ) : (
                   <span
                     className={cn(
-                      "px-2.5 py-1 rounded-full text-xs font-medium",
+                      "px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-xs font-medium",
                       masteryColors[technique.masteryState]
                     )}
                   >
@@ -124,11 +124,11 @@ export function TechniqueCard({
                 )}
               </div>
 
-              <h3 className="font-display text-lg font-semibold text-foreground mb-1">
+              <h3 className="font-display text-base sm:text-lg font-semibold text-foreground mb-1 leading-tight">
                 {technique.name}
               </h3>
 
-              <p className="text-sm text-foreground-muted line-clamp-2 mb-3">
+              <p className="text-xs sm:text-sm text-foreground-muted line-clamp-2 mb-3">
                 {isLocked ? "Complete the previous technique to unlock this one." : technique.whyItMatters}
               </p>
 
@@ -143,24 +143,24 @@ export function TechniqueCard({
               )}
 
               {technique.microSteps && technique.microSteps.length > 0 && (
-                <div className="mb-3 p-3 bg-lavender/20 rounded-xl">
-                  <p className="text-xs font-medium text-foreground-muted mb-2">
+                <div className="mb-3 p-2.5 sm:p-3 bg-lavender/20 rounded-lg sm:rounded-xl">
+                  <p className="text-xs font-medium text-foreground-muted mb-1.5 sm:mb-2">
                     Simplified steps:
                   </p>
                   <ul className="space-y-1">
                     {technique.microSteps.map((step, index) => (
-                      <li key={index} className="text-xs text-foreground flex items-start gap-2">
-                        <span className="flex-shrink-0 w-4 h-4 rounded-full bg-accent/20 text-accent text-xs flex items-center justify-center">
+                      <li key={index} className="text-xs text-foreground flex items-start gap-1.5 sm:gap-2">
+                        <span className="flex-shrink-0 w-4 h-4 rounded-full bg-accent/20 text-accent text-xs flex items-center justify-center mt-0.5">
                           {index + 1}
                         </span>
-                        {step}
+                        <span className="flex-1">{step}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 {isLocked ? (
                   <Button size="sm" disabled>
                     <Lock className="h-4 w-4" />

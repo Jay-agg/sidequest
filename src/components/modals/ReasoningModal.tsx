@@ -26,45 +26,45 @@ export function ReasoningModal() {
 
   const ReasoningContent = () => (
     <>
-      <div className="space-y-4 overflow-y-auto max-h-[50vh] sm:max-h-[60vh] pr-2">
-        <div className="p-4 bg-lavender/30 rounded-xl">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-              <Lightbulb className="h-5 w-5 text-accent" />
+      <div className="space-y-3 sm:space-y-4 overflow-y-auto max-h-[50vh] sm:max-h-[60vh] pr-1 sm:pr-2">
+        <div className="p-3 sm:p-4 bg-lavender/30 rounded-lg sm:rounded-xl">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-accent/20 flex items-center justify-center">
+              <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
             </div>
-            <div>
-              <h4 className="font-display font-semibold text-foreground mb-1">
+            <div className="min-w-0">
+              <h4 className="font-display text-sm sm:text-base font-semibold text-foreground mb-1">
                 Why this plan?
               </h4>
-              <p className="text-sm text-foreground-muted leading-relaxed">
+              <p className="text-xs sm:text-sm text-foreground-muted leading-relaxed">
                 {plan.reasoning}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="p-4 bg-mint/20 rounded-xl">
+        <div className="grid gap-2 sm:gap-3 sm:grid-cols-2">
+          <div className="p-3 sm:p-4 bg-mint/20 rounded-lg sm:rounded-xl">
             <p className="text-xs font-medium text-foreground-muted mb-1">Your Goal</p>
-            <p className="text-sm font-medium text-foreground">{plan.goal}</p>
+            <p className="text-xs sm:text-sm font-medium text-foreground break-words">{plan.goal}</p>
           </div>
-          <div className="p-4 bg-peach/20 rounded-xl">
+          <div className="p-3 sm:p-4 bg-peach/20 rounded-lg sm:rounded-xl">
             <p className="text-xs font-medium text-foreground-muted mb-1">Daily Commitment</p>
-            <p className="text-sm font-medium text-foreground">{plan.dailyMinutes} minutes</p>
+            <p className="text-xs sm:text-sm font-medium text-foreground">{plan.dailyMinutes} minutes</p>
           </div>
         </div>
 
-        <div className="p-4 bg-sky/20 rounded-xl">
+        <div className="p-3 sm:p-4 bg-sky/20 rounded-lg sm:rounded-xl">
           <p className="text-xs font-medium text-foreground-muted mb-2">Techniques in order</p>
-          <ol className="space-y-2">
+          <ol className="space-y-1.5 sm:space-y-2">
             {plan.techniques
               .sort((a, b) => a.order - b.order)
               .map((technique, index) => (
-                <li key={technique.id} className="flex items-start gap-2 text-sm">
+                <li key={technique.id} className="flex items-start gap-2 text-xs sm:text-sm">
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-accent/20 text-accent text-xs flex items-center justify-center font-medium">
                     {index + 1}
                   </span>
-                  <span className="text-foreground">{technique.name}</span>
+                  <span className="text-foreground break-words">{technique.name}</span>
                 </li>
               ))}
           </ol>

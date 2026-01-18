@@ -37,3 +37,4 @@ export { Input } from "./input";
 export { Textarea } from "./textarea";
 export { LoadingSpinner, LoadingDots, LoadingPulse } from "./loading";
 export { ThinkingAnimation } from "./ThinkingAnimation";
+export { LoadingAnimation } from "./LoadingAnimation";

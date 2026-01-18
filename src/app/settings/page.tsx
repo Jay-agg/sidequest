@@ -60,12 +60,12 @@ function SettingsContent() {
     <div className="min-h-screen pb-20 sm:pb-0">
       <Header />
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
-        <h1 className="font-display text-3xl font-bold text-foreground mb-8">
+      <main className="max-w-2xl mx-auto px-3 sm:px-4 md:px-6 py-6 sm:py-8">
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-6 sm:mb-8">
           Settings
         </h1>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {plan && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -82,17 +82,18 @@ function SettingsContent() {
             transition={{ delay: 0.2 }}
           >
             <Card>
-              <CardContent className="p-6">
-                <h2 className="font-display text-xl font-semibold text-foreground mb-2">
+              <CardContent className="p-4 sm:p-6">
+                <h2 className="font-display text-lg sm:text-xl font-semibold text-foreground mb-2">
                   Learning Plan
                 </h2>
-                <p className="text-sm text-foreground-muted mb-4">
+                <p className="text-xs sm:text-sm text-foreground-muted mb-3 sm:mb-4">
                   Currently learning: <span className="font-medium text-foreground">{plan.hobby}</span>
                 </p>
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   <Button
                     variant="outline"
                     className="w-full justify-start"
+                    size="sm"
                     onClick={handleExport}
                   >
                     <Download className="h-4 w-4" />
@@ -102,6 +103,7 @@ function SettingsContent() {
                   <Button
                     variant="outline"
                     className="w-full justify-start"
+                    size="sm"
                     onClick={() => setShowClearDialog(true)}
                   >
                     <RotateCcw className="h-4 w-4" />
@@ -119,11 +121,11 @@ function SettingsContent() {
             transition={{ delay: 0.3 }}
           >
             <Card>
-              <CardContent className="p-6">
-                <h2 className="font-display text-xl font-semibold text-foreground mb-4">
+              <CardContent className="p-4 sm:p-6">
+                <h2 className="font-display text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">
                   About SideQuest
                 </h2>
-                <div className="space-y-4 text-sm text-foreground-muted">
+                <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-foreground-muted">
                   <p>
                     SideQuest helps you master any hobby by focusing on the most impactful
                     5-8 techniques. No information overload, just focused learning.
@@ -131,7 +133,7 @@ function SettingsContent() {
                   <p>
                     Your data is stored locally on your device. No account required.
                   </p>
-                  <div className="pt-4 border-t border-card-border">
+                  <div className="pt-3 sm:pt-4 border-t border-card-border">
                     <p className="text-xs text-foreground-subtle">Version 1.0.0</p>
                   </div>
                 </div>

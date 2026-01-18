@@ -176,14 +176,20 @@ body {
   .bg-card { background-color: var(--card); }
   .bg-muted { background-color: var(--muted); }
   .bg-accent { background-color: var(--accent); }
+  .bg-accent-hover { background-color: var(--accent-hover); }
   .bg-destructive { background-color: var(--destructive); }
   
   .bg-lavender { background-color: var(--lavender); }
+  .bg-lavender-dark { background-color: var(--lavender-dark); }
   .bg-peach { background-color: var(--peach); }
+  .bg-peach-dark { background-color: var(--peach-dark); }
   .bg-mint { background-color: var(--mint); }
+  .bg-mint-dark { background-color: var(--mint-dark); }
   .bg-sky { background-color: var(--sky); }
+  .bg-sky-dark { background-color: var(--sky-dark); }
   .bg-sky-blue { background-color: var(--sky-blue); }
   .bg-warm-yellow { background-color: var(--warm-yellow); }
+  .bg-warm-yellow-dark { background-color: var(--warm-yellow-dark); }
   
   .text-foreground { color: var(--foreground); }
   .text-foreground-muted { color: var(--foreground-muted); }

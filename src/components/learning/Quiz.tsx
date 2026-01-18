@@ -23,8 +23,8 @@ export function Quiz({ questions, onComplete, techniqueName }: QuizProps) {
   if (!questions || questions.length === 0) {
     return (
       <Card>
-        <CardContent className="p-8 text-center">
-          <p className="text-foreground-muted">No quiz questions available for this technique yet.</p>
+        <CardContent className="p-4 sm:p-6 md:p-8 text-center">
+          <p className="text-sm sm:text-base text-foreground-muted">No quiz questions available for this technique yet.</p>
         </CardContent>
       </Card>
     );
@@ -71,47 +71,47 @@ export function Quiz({ questions, onComplete, techniqueName }: QuizProps) {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="text-center py-8"
+        className="text-center py-6 sm:py-8"
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", delay: 0.2 }}
-          className={`w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center ${
+          className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 rounded-full flex items-center justify-center ${
             score >= 80 ? "bg-mint/30" : score >= 50 ? "bg-warm-yellow/30" : "bg-peach/30"
           }`}
         >
-          <Trophy className={`w-10 h-10 ${
+          <Trophy className={`w-8 h-8 sm:w-10 sm:h-10 ${
             score >= 80 ? "text-green-500" : score >= 50 ? "text-yellow-500" : "text-orange-500"
           }`} />
         </motion.div>
 
-        <h3 className="font-display text-2xl font-bold text-foreground mb-2">
+        <h3 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">
           {score >= 80 ? "Excellent!" : score >= 50 ? "Good effort!" : "Keep practicing!"}
         </h3>
         
-        <p className="text-foreground-muted mb-2">
+        <p className="text-sm sm:text-base text-foreground-muted mb-2">
           You scored <span className="font-bold text-foreground">{score}%</span> on {techniqueName}
         </p>
         
-        <p className="text-sm text-foreground-subtle mb-6">
+        <p className="text-xs sm:text-sm text-foreground-subtle mb-4 sm:mb-6">
           {correctCount} out of {questions.length} correct
         </p>
 
-        <div className="flex items-center justify-center gap-2 mb-6">
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
           {answers.map((correct, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.1 }}
-              className={`w-3 h-3 rounded-full ${correct ? "bg-green-500" : "bg-red-400"}`}
+              className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${correct ? "bg-green-500" : "bg-red-400"}`}
             />
           ))}
         </div>
 
         {score < 80 && (
-          <Button onClick={handleRetry} variant="outline" className="gap-2">
+          <Button onClick={handleRetry} variant="outline" className="gap-2" size="sm">
             <RefreshCw className="w-4 h-4" />
             Try Again
           </Button>
@@ -121,16 +121,16 @@ export function Quiz({ questions, onComplete, techniqueName }: QuizProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-sm text-foreground-muted">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <span className="text-xs sm:text-sm text-foreground-muted">
           Question {currentIndex + 1} of {questions.length}
         </span>
-        <div className="flex gap-1">
+        <div className="flex gap-0.5 sm:gap-1">
           {questions.map((_, i) => (
             <div
               key={i}
-              className={`w-2 h-2 rounded-full transition-colors ${
+              className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-colors ${
                 i < currentIndex
                   ? answers[i]
                     ? "bg-green-500"
@@ -151,11 +151,11 @@ export function Quiz({ questions, onComplete, techniqueName }: QuizProps) {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
         >
-          <h4 className="text-lg font-medium text-foreground mb-6">
+          <h4 className="text-base sm:text-lg font-medium text-foreground mb-4 sm:mb-6">
             {currentQuestion.question}
           </h4>
 
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {currentQuestion.options.map((option, index) => {
               const isSelected = selectedAnswer === index;
               const isCorrectAnswer = index === currentQuestion.correctIndex;
@@ -185,12 +185,12 @@ export function Quiz({ questions, onComplete, techniqueName }: QuizProps) {
                   disabled={showResult}
                   whileHover={!showResult ? { scale: 1.01 } : {}}
                   whileTap={!showResult ? { scale: 0.99 } : {}}
-                  className={`w-full p-4 rounded-xl border-2 text-left transition-all ${bgColor} ${borderColor} ${textColor} ${
+                  className={`w-full p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 text-left transition-all ${bgColor} ${borderColor} ${textColor} ${
                     showResult ? "cursor-default" : "cursor-pointer"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-medium ${
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <span className={`w-7 h-7 sm:w-8 sm:h-8 rounded-md sm:rounded-lg flex items-center justify-center text-xs sm:text-sm font-medium flex-shrink-0 ${
                       showResult && isCorrectAnswer
                         ? "bg-green-500 text-white"
                         : showResult && isSelected && !isCorrectAnswer
@@ -199,12 +199,12 @@ export function Quiz({ questions, onComplete, techniqueName }: QuizProps) {
                     }`}>
                       {String.fromCharCode(65 + index)}
                     </span>
-                    <span className="flex-1">{option}</span>
+                    <span className="flex-1 text-sm sm:text-base">{option}</span>
                     {showResult && isCorrectAnswer && (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
                     )}
                     {showResult && isSelected && !isCorrectAnswer && (
-                      <XCircle className="w-5 h-5 text-red-500" />
+                      <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 flex-shrink-0" />
                     )}
                   </div>
                 </motion.button>

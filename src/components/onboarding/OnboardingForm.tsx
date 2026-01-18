@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ArrowRight, ArrowLeft, Zap } from "lucide-react";
 import { Button, Input, Textarea, Slider, Card, CardContent, ThinkingAnimation } from "@/components/ui";
-import { useLearningPlanStore } from "@/stores";
+import { useLearningPlanStore, useUIStore } from "@/stores";
 import { formatDuration } from "@/lib/utils";
 
 type Step = "hobby" | "goal" | "time" | "generating" | "error";
@@ -25,6 +25,7 @@ export function OnboardingForm() {
   
   const setPlan = useLearningPlanStore((state) => state.setPlan);
   const setIsGenerating = useLearningPlanStore((state) => state.setIsGenerating);
+  const setUIDailyMinutes = useUIStore((state) => state.setDailyMinutes);
 
   useEffect(() => {
     if (step === "generating" && quotes.length > 0) {
@@ -111,6 +112,7 @@ export function OnboardingForm() {
 
       const plan = await response.json();
       setPlan(plan);
+      setUIDailyMinutes(plan.dailyMinutes);
       setIsGenerating(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -196,18 +198,20 @@ export function OnboardingForm() {
           className="w-full max-w-lg"
         >
           {step === "generating" ? (
-            <div className="p-8">
+            <div className="p-4 sm:p-6 md:p-8">
               <AnimatePresence mode="wait">
                 <motion.div
                   key="generating"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5 }}
-                  className="text-center py-12"
+                  className="text-center py-8 sm:py-12"
                 >
-                  <ThinkingAnimation />
+                  <div className="w-32 h-32 sm:w-48 sm:h-48 mx-auto">
+                    <ThinkingAnimation />
+                  </div>
                   <motion.h2
-                    className="font-display text-2xl font-bold text-foreground mb-4 mt-6"
+                    className="font-display text-xl sm:text-2xl font-bold text-foreground mb-3 sm:mb-4 mt-4 sm:mt-6"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
@@ -223,9 +227,9 @@ export function OnboardingForm() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.5 }}
-                        className="mt-6 px-6"
+                        className="mt-4 sm:mt-6 px-4 sm:px-6"
                       >
-                        <p className="text-lg text-foreground-muted italic">
+                        <p className="text-base sm:text-lg text-foreground-muted italic">
                           "{quotes[currentQuoteIndex]}"
                         </p>
                       </motion.div>
@@ -233,7 +237,7 @@ export function OnboardingForm() {
                   </AnimatePresence>
 
                   {quotes.length === 0 && (
-                    <p className="text-foreground-muted mt-4">
+                    <p className="text-sm sm:text-base text-foreground-muted mt-4 px-4">
                       Selecting the most impactful techniques for {hobby}...
                     </p>
                   )}
@@ -242,7 +246,7 @@ export function OnboardingForm() {
             </div>
           ) : (
             <Card>
-              <CardContent className="p-8">
+              <CardContent className="p-4 sm:p-6 md:p-8">
                 <AnimatePresence mode="wait">
                   {step === "hobby" && (
                     <motion.div
@@ -251,11 +255,11 @@ export function OnboardingForm() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3 }}
-                      className="space-y-6"
+                      className="space-y-4 sm:space-y-6"
                     >
-                      <div className="text-center mb-8">
+                      <div className="text-center mb-6 sm:mb-8">
                         <motion.div
-                          className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent/10 flex items-center justify-center"
+                          className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mx-auto mb-3 sm:mb-4 rounded-xl sm:rounded-2xl bg-accent/10 flex items-center justify-center"
                           animate={{
                             scale: [1, 1.1, 1],
                             rotate: [0, 5, -5, 0],
@@ -266,10 +270,10 @@ export function OnboardingForm() {
                             ease: "easeInOut",
                           }}
                         >
-                          <Sparkles className="h-8 w-8 text-accent" />
+                          <Sparkles className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-accent" />
                         </motion.div>
                         <motion.h2
-                          className="font-display text-3xl font-bold text-foreground mb-2"
+                          className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-2"
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2 }}
@@ -277,7 +281,7 @@ export function OnboardingForm() {
                           What do you want to learn?
                         </motion.h2>
                         <motion.p
-                          className="text-foreground-muted mb-4"
+                          className="text-sm sm:text-base text-foreground-muted mb-3 sm:mb-4 px-2"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.3 }}
@@ -285,7 +289,7 @@ export function OnboardingForm() {
                           We will create a focused plan with just 5-8 essential techniques
                         </motion.p>
                         <motion.div
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent/10 text-sm text-foreground"
+                          className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-accent/10 text-xs sm:text-sm text-foreground"
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: 0.4 }}
@@ -343,21 +347,21 @@ export function OnboardingForm() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3 }}
-                      className="space-y-6"
+                      className="space-y-4 sm:space-y-6"
                     >
-                      <div className="text-center mb-8">
+                      <div className="text-center mb-6 sm:mb-8">
                         <motion.div
-                          className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent/10 flex items-center justify-center"
+                          className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mx-auto mb-3 sm:mb-4 rounded-xl sm:rounded-2xl bg-accent/10 flex items-center justify-center"
                           initial={{ scale: 0 }}
                           animate={{ scale: 1, rotate: 360 }}
                           transition={{ type: "spring", stiffness: 200 }}
                         >
-                          <Zap className="h-8 w-8 text-accent" />
+                          <Zap className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-accent" />
                         </motion.div>
-                        <h2 className="font-display text-3xl font-bold text-foreground mb-2">
+                        <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-2">
                           What is your goal?
                         </h2>
-                        <p className="text-foreground-muted">
+                        <p className="text-sm sm:text-base text-foreground-muted px-2">
                           This helps us choose the most relevant techniques for you
                         </p>
                       </div>
@@ -375,7 +379,7 @@ export function OnboardingForm() {
                       </div>
 
                       <div className="flex gap-3">
-                        <Button variant="outline" className="flex-1" onClick={handleBack}>
+                        <Button variant="outline" className="flex-1" size="lg" onClick={handleBack}>
                           <ArrowLeft className="h-4 w-4" />
                           Back
                         </Button>
@@ -399,33 +403,33 @@ export function OnboardingForm() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3 }}
-                      className="space-y-6"
+                      className="space-y-4 sm:space-y-6"
                     >
-                      <div className="text-center mb-8">
-                        <h2 className="font-display text-3xl font-bold text-foreground mb-2">
+                      <div className="text-center mb-6 sm:mb-8">
+                        <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-2">
                           How much time can you commit?
                         </h2>
-                        <p className="text-foreground-muted">
+                        <p className="text-sm sm:text-base text-foreground-muted px-2">
                           We will adjust the depth of each technique to fit your schedule
                         </p>
                       </div>
 
                       <motion.div
-                        className="p-6 bg-accent/10 rounded-2xl"
+                        className="p-4 sm:p-6 bg-accent/10 rounded-xl sm:rounded-2xl"
                         whileHover={{ scale: 1.02 }}
                         transition={{ type: "spring", stiffness: 300 }}
                       >
-                        <div className="text-center mb-6">
+                        <div className="text-center mb-4 sm:mb-6">
                           <motion.span
                             key={dailyMinutes}
-                            className="text-5xl font-display font-bold text-accent"
+                            className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-accent block"
                             initial={{ scale: 1.2, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ type: "spring", stiffness: 200 }}
                           >
                             {formatDuration(dailyMinutes)}
                           </motion.span>
-                          <p className="text-sm text-foreground-muted mt-1">per day</p>
+                          <p className="text-xs sm:text-sm text-foreground-muted mt-1">per day</p>
                         </div>
 
                         <Slider
@@ -444,7 +448,7 @@ export function OnboardingForm() {
                       </motion.div>
 
                       <div className="flex gap-3">
-                        <Button variant="outline" className="flex-1" onClick={handleBack}>
+                        <Button variant="outline" className="flex-1" size="lg" onClick={handleBack}>
                           <ArrowLeft className="h-4 w-4" />
                           Back
                         </Button>

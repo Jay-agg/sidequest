@@ -97,23 +97,23 @@ export function FlashCards({ questions, techniqueName, onComplete }: FlashCardsP
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-mint/30 flex items-center justify-center">
             <CheckCircle2 className="w-8 h-8 text-green-500" />
           </div>
-          <h3 className="font-display text-xl font-bold text-foreground mb-2">
+          <h3 className="font-display text-lg sm:text-xl font-bold text-foreground mb-2">
             Flash Cards Complete!
           </h3>
-          <p className="text-foreground-muted mb-6">
+          <p className="text-sm sm:text-base text-foreground-muted mb-4 sm:mb-6">
             You knew {knownCards.length} out of {questions.length} cards
           </p>
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="p-4 rounded-xl bg-mint/20">
-              <p className="text-2xl font-bold text-green-500">{knownCards.length}</p>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-mint/20">
+              <p className="text-xl sm:text-2xl font-bold text-green-500">{knownCards.length}</p>
               <p className="text-xs text-foreground-muted">Know it</p>
             </div>
-            <div className="p-4 rounded-xl bg-warm-yellow/20">
-              <p className="text-2xl font-bold text-yellow-500">{reviewCards.length}</p>
+            <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-warm-yellow/20">
+              <p className="text-xl sm:text-2xl font-bold text-yellow-500">{reviewCards.length}</p>
               <p className="text-xs text-foreground-muted">Review</p>
             </div>
           </div>
-          <Button onClick={handleRestart} className="gap-2">
+          <Button onClick={handleRestart} className="gap-2" size="sm">
             <RotateCcw className="w-4 h-4" />
             Try Again
           </Button>
@@ -124,8 +124,8 @@ export function FlashCards({ questions, techniqueName, onComplete }: FlashCardsP
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-foreground-muted">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
+        <p className="text-xs sm:text-sm text-foreground-muted">
           Card {currentIndex + 1} of {questions.length}
         </p>
         <p className="text-xs text-foreground-muted">
@@ -133,7 +133,7 @@ export function FlashCards({ questions, techniqueName, onComplete }: FlashCardsP
         </p>
       </div>
 
-      <div className="relative h-80 flex items-center justify-center">
+      <div className="relative h-64 sm:h-72 md:h-80 flex items-center justify-center">
         {!isExiting && currentIndex < questions.length - 1 && (
           <motion.div
             key={`next-${currentIndex + 1}`}
@@ -142,10 +142,10 @@ export function FlashCards({ questions, techniqueName, onComplete }: FlashCardsP
             animate={{ scale: 0.95, opacity: 0.7, y: 0 }}
             style={{ zIndex: 0 }}
           >
-            <Card className={`h-80 border-2 bg-gradient-to-br ${cardColors[(currentIndex + 1) % cardColors.length]}`}>
-              <CardContent className="h-full p-6 flex items-center justify-center">
+            <Card className={`h-64 sm:h-72 md:h-80 border-2 bg-gradient-to-br ${cardColors[(currentIndex + 1) % cardColors.length]}`}>
+              <CardContent className="h-full p-4 sm:p-6 flex items-center justify-center">
                 <div className="text-center blur-sm">
-                  <p className="text-lg font-medium text-foreground">
+                  <p className="text-sm sm:text-base md:text-lg font-medium text-foreground">
                     Next Question
                   </p>
                 </div>
@@ -181,7 +181,7 @@ export function FlashCards({ questions, techniqueName, onComplete }: FlashCardsP
               style={{ zIndex: 10 }}
             >
               <Card 
-                className={`h-80 border-[3px] bg-gradient-to-br ${currentColor} transition-all duration-200 ${
+                className={`h-64 sm:h-72 md:h-80 border-[3px] bg-gradient-to-br ${currentColor} transition-all duration-200 ${
                   swipeDirection === "right" 
                     ? "border-green-500 shadow-green-500/50 shadow-xl" 
                     : swipeDirection === "left" 
@@ -190,26 +190,26 @@ export function FlashCards({ questions, techniqueName, onComplete }: FlashCardsP
                 }`}
                 onClick={() => !isExiting && setIsFlipped(!isFlipped)}
               >
-                <CardContent className="h-full p-6 flex flex-col items-center justify-center relative">
+                <CardContent className="h-full p-4 sm:p-5 md:p-6 flex flex-col items-center justify-center relative">
                   <AnimatePresence>
                     {swipeDirection === "right" && (
                       <motion.div
-                        className="absolute top-4 right-4 text-green-500"
+                        className="absolute top-2 right-2 sm:top-4 sm:right-4 text-green-500"
                         initial={{ scale: 0, rotate: -45 }}
                         animate={{ scale: 1.5, rotate: 0 }}
                         exit={{ scale: 0 }}
                       >
-                        <CheckCircle2 className="w-12 h-12" />
+                        <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />
                       </motion.div>
                     )}
                     {swipeDirection === "left" && (
                       <motion.div
-                        className="absolute top-4 left-4 text-yellow-500"
+                        className="absolute top-2 left-2 sm:top-4 sm:left-4 text-yellow-500"
                         initial={{ scale: 0, rotate: 45 }}
                         animate={{ scale: 1.5, rotate: 0 }}
                         exit={{ scale: 0 }}
                       >
-                        <X className="w-12 h-12" />
+                        <X className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -222,8 +222,8 @@ export function FlashCards({ questions, techniqueName, onComplete }: FlashCardsP
                     className="w-full h-full flex items-center justify-center"
                   >
                     {!isFlipped ? (
-                      <div className="text-center">
-                        <p className="text-lg font-medium text-foreground mb-4">
+                      <div className="text-center px-2">
+                        <p className="text-base sm:text-lg font-medium text-foreground mb-3 sm:mb-4">
                           {currentQuestion.question}
                         </p>
                         <p className="text-xs text-foreground-muted">
@@ -231,12 +231,12 @@ export function FlashCards({ questions, techniqueName, onComplete }: FlashCardsP
                         </p>
                       </div>
                     ) : (
-                      <div className="text-center" style={{ transform: "rotateY(180deg)" }}>
-                        <p className="text-base text-foreground mb-4">
+                      <div className="text-center px-2" style={{ transform: "rotateY(180deg)" }}>
+                        <p className="text-sm sm:text-base text-foreground mb-3 sm:mb-4">
                           {currentQuestion.options[currentQuestion.correctIndex]}
                         </p>
                         {currentQuestion.explanation && (
-                          <p className="text-sm text-foreground-muted">
+                          <p className="text-xs sm:text-sm text-foreground-muted">
                             {currentQuestion.explanation}
                           </p>
                         )}

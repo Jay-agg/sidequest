@@ -63,7 +63,7 @@ function LearningDashboard() {
               animate={{ opacity: 1, y: 0 }}
               className="mb-8 rounded-3xl overflow-hidden border-[3px] border-card-border"
             >
-              <div className="relative aspect-[21/9] sm:aspect-[21/7]">
+              <div className="relative aspect-[16/9] sm:aspect-[21/9] md:aspect-[21/7]">
                 <img
                   src={plan.hobbyImageUrl}
                   alt={`${plan.hobby} learning journey`}
@@ -72,21 +72,22 @@ function LearningDashboard() {
                 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                 
-                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 flex items-end justify-between gap-4">
-                  <div>
-                    <h1 className="font-display text-3xl sm:text-4xl font-bold text-white mb-2 drop-shadow-lg">
+                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 sm:gap-4">
+                  <div className="flex-1 min-w-0">
+                    <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg leading-tight">
                       Your {plan.hobby} Journey
                     </h1>
-                    <p className="text-white/90 text-sm sm:text-base drop-shadow-md">
+                    <p className="text-white/90 text-xs sm:text-sm md:text-base drop-shadow-md">
                       {plan.techniques.length} techniques to master
                     </p>
                   </div>
                   <Button 
                     variant="outline" 
                     onClick={openReasoningModal}
-                    className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 backdrop-blur-sm"
+                    size="sm"
+                    className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 backdrop-blur-sm flex-shrink-0"
                   >
-                    <Lightbulb className="h-4 w-4" />
+                    <Lightbulb className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">Why this plan?</span>
                     <span className="sm:hidden">Why?</span>
                   </Button>
@@ -96,73 +97,73 @@ function LearningDashboard() {
           )}
 
           {!plan.hobbyImageUrl && (
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
               <div>
-                <h1 className="font-display text-3xl font-bold text-foreground mb-1">
+                <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-1">
                   Your {plan.hobby} Journey
                 </h1>
-                <p className="text-foreground-muted">
+                <p className="text-sm sm:text-base text-foreground-muted">
                   {plan.techniques.length} techniques to master
                 </p>
               </div>
-              <Button variant="outline" onClick={openReasoningModal}>
+              <Button variant="outline" onClick={openReasoningModal} size="sm" className="w-full sm:w-auto">
                 <Lightbulb className="h-4 w-4" />
                 Why this plan?
               </Button>
             </div>
           )}
 
-          <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4 mb-8">
+          <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-2 lg:grid-cols-4 mb-6 sm:mb-8">
             <Card>
-              <CardContent className="p-4 sm:p-6 flex items-center gap-4">
-                <CircularProgress value={progress.percentage} size={56} strokeWidth={5} />
-                <div>
-                  <p className="text-2xl font-display font-bold text-foreground">
+              <CardContent className="p-3 sm:p-4 md:p-6 flex items-center gap-2 sm:gap-3 md:gap-4">
+                <CircularProgress value={progress.percentage} size={48} strokeWidth={5} className="sm:w-14 sm:h-14" />
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-display font-bold text-foreground">
                     {progress.completed}/{progress.total}
                   </p>
-                  <p className="text-sm text-foreground-muted">Mastered</p>
+                  <p className="text-xs sm:text-sm text-foreground-muted">Mastered</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-4 sm:p-6 flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-warm-yellow/20 flex items-center justify-center">
-                  <Flame className="w-7 h-7 text-orange-500" />
+              <CardContent className="p-3 sm:p-4 md:p-6 flex items-center gap-2 sm:gap-3 md:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl sm:rounded-2xl bg-warm-yellow/20 flex items-center justify-center flex-shrink-0">
+                  <Flame className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-orange-500" />
                 </div>
-                <div>
-                  <p className="text-2xl font-display font-bold text-foreground">
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-display font-bold text-foreground">
                     {plan.streakDays || 0}
                   </p>
-                  <p className="text-sm text-foreground-muted">Day streak</p>
+                  <p className="text-xs sm:text-sm text-foreground-muted">Day streak</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-4 sm:p-6 flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-sky-blue/20 flex items-center justify-center">
-                  <Target className="w-7 h-7 text-blue-500" />
+              <CardContent className="p-3 sm:p-4 md:p-6 flex items-center gap-2 sm:gap-3 md:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl sm:rounded-2xl bg-sky-blue/20 flex items-center justify-center flex-shrink-0">
+                  <Target className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-blue-500" />
                 </div>
-                <div>
-                  <p className="text-2xl font-display font-bold text-foreground">
+                <div className="min-w-0">
+                  <p className="text-lg sm:text-xl md:text-2xl font-display font-bold text-foreground leading-tight">
                     {totalPracticeHours > 0 ? `${totalPracticeHours}h ${totalPracticeMinutes}m` : `${totalPracticeMinutes}m`}
                   </p>
-                  <p className="text-sm text-foreground-muted">Practiced</p>
+                  <p className="text-xs sm:text-sm text-foreground-muted">Practiced</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-4 sm:p-6 flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-mint/20 flex items-center justify-center">
-                  <Trophy className="w-7 h-7 text-green-500" />
+              <CardContent className="p-3 sm:p-4 md:p-6 flex items-center gap-2 sm:gap-3 md:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl sm:rounded-2xl bg-mint/20 flex items-center justify-center flex-shrink-0">
+                  <Trophy className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-green-500" />
                 </div>
-                <div>
-                  <p className="text-2xl font-display font-bold text-foreground">
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-display font-bold text-foreground">
                     {plan.techniques.filter((t) => t.quizCompleted && (t.quizScore || 0) >= 80).length}
                   </p>
-                  <p className="text-sm text-foreground-muted">Quizzes passed</p>
+                  <p className="text-xs sm:text-sm text-foreground-muted">Quiz passed</p>
                 </div>
               </CardContent>
             </Card>
@@ -175,9 +176,9 @@ function LearningDashboard() {
           </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
+        <div className="grid gap-6 sm:gap-8 lg:grid-cols-[2fr_1fr]">
           <div>
-            <h2 className="font-display text-2xl font-semibold text-foreground mb-6">
+            <h2 className="font-display text-xl sm:text-2xl font-semibold text-foreground mb-4 sm:mb-6">
               Your Techniques
             </h2>
             <div className="space-y-4">
