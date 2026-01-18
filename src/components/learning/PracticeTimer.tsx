@@ -108,7 +108,7 @@ export function PracticeTimer({ targetMinutes, onComplete }: PracticeTimerProps)
             <CheckCircle className="w-6 h-6 text-green-500" />
           </motion.div>
           <p className="text-foreground mb-4">Great practice session!</p>
-          <Button onClick={handleFinish} className="gap-2">
+          <Button onClick={handleFinish} className="gap-2 h-10 sm:h-11 px-4 sm:px-6 text-sm sm:text-base">
             <CheckCircle className="w-4 h-4" />
             Log {minutes} minutes
           </Button>

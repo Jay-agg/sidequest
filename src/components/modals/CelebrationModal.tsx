@@ -105,7 +105,7 @@ export function CelebrationModal({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.7 }}
                 >
-                  <Button onClick={onClose} size="lg" className="gap-2">
+                  <Button onClick={onClose} className="gap-2 h-10 sm:h-14 px-4 sm:px-8 text-sm sm:text-lg">
                     Continue Learning
                     <ChevronRight className="w-4 h-4" />
                   </Button>

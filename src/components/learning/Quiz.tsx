@@ -220,7 +220,7 @@ export function Quiz({ questions, onComplete, techniqueName }: QuizProps) {
           animate={{ opacity: 1, y: 0 }}
           className="pt-4"
         >
-          <Button onClick={handleNext} className="w-full gap-2">
+          <Button onClick={handleNext} className="w-full gap-2 h-10 sm:h-11 px-4 sm:px-6 text-sm sm:text-base">
             {currentIndex < questions.length - 1 ? "Next Question" : "See Results"}
             <ChevronRight className="w-4 h-4" />
           </Button>

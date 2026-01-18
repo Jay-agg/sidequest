@@ -205,13 +205,13 @@ export function OnboardingForm() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5 }}
-                  className="text-center py-8 sm:py-12"
+                  className="flex flex-col items-center justify-center text-center py-8 sm:py-12 min-h-[400px] sm:min-h-[500px]"
                 >
-                  <div className="w-32 h-32 sm:w-48 sm:h-48 mx-auto">
+                  <div className="w-32 h-32 sm:w-48 sm:h-48 mx-auto mb-6 sm:mb-8 flex-shrink-0">
                     <ThinkingAnimation />
                   </div>
                   <motion.h2
-                    className="font-display text-xl sm:text-2xl font-bold text-foreground mb-3 sm:mb-4 mt-4 sm:mt-6"
+                    className="font-display text-xl sm:text-2xl font-bold text-foreground mb-4 sm:mb-6"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
@@ -227,7 +227,7 @@ export function OnboardingForm() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.5 }}
-                        className="mt-4 sm:mt-6 px-4 sm:px-6"
+                        className="px-4 sm:px-6 max-w-2xl"
                       >
                         <p className="text-base sm:text-lg text-foreground-muted italic">
                           "{quotes[currentQuoteIndex]}"
@@ -237,7 +237,7 @@ export function OnboardingForm() {
                   </AnimatePresence>
 
                   {quotes.length === 0 && (
-                    <p className="text-sm sm:text-base text-foreground-muted mt-4 px-4">
+                    <p className="text-sm sm:text-base text-foreground-muted px-4 max-w-2xl">
                       Selecting the most impactful techniques for {hobby}...
                     </p>
                   )}
@@ -328,8 +328,7 @@ export function OnboardingForm() {
                         transition={{ delay: 0.6 }}
                       >
                         <Button
-                          className="w-full"
-                          size="lg"
+                          className="w-full h-10 sm:h-14 px-4 sm:px-8 text-sm sm:text-lg"
                           onClick={handleNext}
                           disabled={!canProceed()}
                         >
@@ -379,13 +378,12 @@ export function OnboardingForm() {
                       </div>
 
                       <div className="flex gap-3">
-                        <Button variant="outline" className="flex-1" size="lg" onClick={handleBack}>
+                        <Button variant="outline" className="flex-1 h-10 sm:h-14 px-4 sm:px-8 text-sm sm:text-lg" onClick={handleBack}>
                           <ArrowLeft className="h-4 w-4" />
                           Back
                         </Button>
                         <Button
-                          className="flex-1"
-                          size="lg"
+                          className="flex-1 h-10 sm:h-14 px-4 sm:px-8 text-sm sm:text-lg"
                           onClick={handleNext}
                           disabled={!canProceed()}
                         >
@@ -448,11 +446,11 @@ export function OnboardingForm() {
                       </motion.div>
 
                       <div className="flex gap-3">
-                        <Button variant="outline" className="flex-1" size="lg" onClick={handleBack}>
+                        <Button variant="outline" className="flex-1 h-10 sm:h-14 px-4 sm:px-8 text-sm sm:text-lg" onClick={handleBack}>
                           <ArrowLeft className="h-4 w-4" />
                           Back
                         </Button>
-                        <Button className="flex-1" size="lg" onClick={handleNext}>
+                        <Button className="flex-1 h-10 sm:h-14 px-4 sm:px-8 text-sm sm:text-lg" onClick={handleNext}>
                           Create My Plan
                           <Sparkles className="h-4 w-4" />
                         </Button>

@@ -126,7 +126,7 @@ export function DecompositionModal() {
             <p className="text-xs sm:text-sm text-foreground-muted mb-4">
               Finding this technique too challenging? Our AI can break it down into smaller, easier sub-techniques that you can learn one at a time.
             </p>
-            <Button onClick={handleDecompose} disabled={isDecomposing} className="w-full sm:w-auto">
+            <Button onClick={handleDecompose} disabled={isDecomposing} className="w-full sm:w-auto h-10 sm:h-11 px-4 sm:px-6 text-sm sm:text-base">
               {isDecomposing ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -210,10 +210,10 @@ export function DecompositionModal() {
 
       {subTechniques.length > 0 && (
         <div className="flex flex-col sm:flex-row gap-3 mt-4">
-          <Button variant="outline" className="flex-1" onClick={handleCancel}>
+          <Button variant="outline" className="flex-1 h-10 sm:h-11 px-4 sm:px-6 text-sm sm:text-base" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button className="flex-1" onClick={handleConfirm}>
+          <Button className="flex-1 h-10 sm:h-11 px-4 sm:px-6 text-sm sm:text-base" onClick={handleConfirm}>
             Add to my plan
           </Button>
         </div>

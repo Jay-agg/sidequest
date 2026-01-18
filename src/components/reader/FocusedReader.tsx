@@ -102,7 +102,7 @@ export function FocusedReader() {
 
         <footer className="flex-shrink-0 glass border-t border-card-border px-4 py-4 sm:hidden">
           <div className="flex gap-3">
-            <Button className="flex-1" variant="success" onClick={handleDone}>
+            <Button className="flex-1 h-10 sm:h-11 px-4 sm:px-6 text-sm sm:text-base" variant="success" onClick={handleDone}>
               <CheckCircle2 className="h-4 w-4" />
               Done Learning
             </Button>

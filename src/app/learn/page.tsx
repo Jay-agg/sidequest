@@ -254,7 +254,7 @@ export default function LearnPage() {
                   <CheckCircle2 className="w-4 h-4" />
                   I have learnt enough
                 </Button> */}
-                <Button onClick={() => setActiveTab("quiz")} className="gap-2">
+                <Button onClick={() => setActiveTab("quiz")} className="gap-2 h-10 sm:h-11 px-4 sm:px-6 text-sm sm:text-base">
                   Take the Quiz
                   <ChevronRight className="w-4 h-4" />
                 </Button>
@@ -293,11 +293,11 @@ export default function LearnPage() {
                           ? "Great job! You've demonstrated understanding of this technique."
                           : "Consider reviewing the material and trying again."}
                       </p>
-                      <div className="flex justify-center gap-3">
-                        <Button variant="outline" onClick={() => setActiveTab("learn")}>
+                      <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3">
+                        <Button variant="outline" onClick={() => setActiveTab("learn")} className="h-10 sm:h-11 px-4 sm:px-6 text-sm sm:text-base">
                           Review Material
                         </Button>
-                        <Button onClick={() => setActiveTab("flashcards")}>
+                        <Button onClick={() => setActiveTab("flashcards")} className="h-10 sm:h-11 px-4 sm:px-6 text-sm sm:text-base">
                           Continue to Cards
                         </Button>
                       </div>
@@ -404,7 +404,7 @@ export default function LearnPage() {
                     <Button 
                       variant="outline" 
                       onClick={handleMarkMastered}
-                      className="gap-2"
+                      className="gap-2 h-10 sm:h-11 px-4 sm:px-6 text-sm sm:text-base"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       Mark as Mastered
@@ -440,7 +440,7 @@ export default function LearnPage() {
                       <p className="text-foreground-muted mb-4">
                         You've practiced enough to mark this technique as mastered and move on.
                       </p>
-                      <Button onClick={handleMarkMastered} size="lg" className="gap-2">
+                      <Button onClick={handleMarkMastered} className="gap-2 h-10 sm:h-14 px-4 sm:px-8 text-sm sm:text-lg">
                         <CheckCircle2 className="w-4 h-4" />
                         Mark as Mastered
                       </Button>
@@ -452,37 +452,6 @@ export default function LearnPage() {
           )}
         </AnimatePresence>
       </main>
-
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-lg border-t border-card-border lg:hidden">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-3 overflow-x-auto pb-2">
-            {plan.techniques
-              .sort((a, b) => a.order - b.order)
-              .map((tech, index) => (
-                <button
-                  key={tech.id}
-                  onClick={() => {
-                    setActiveTechnique(tech.id);
-                    setActiveTab("learn");
-                  }}
-                  className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-sm font-medium transition-all ${
-                    tech.id === technique.id
-                      ? "bg-accent text-accent-foreground"
-                      : tech.masteryState === "mastered"
-                      ? "bg-mint/30 text-green-500"
-                      : "bg-card text-foreground-muted hover:bg-accent/10"
-                  }`}
-                >
-                  {tech.masteryState === "mastered" ? (
-                    <CheckCircle2 className="w-4 h-4" />
-                  ) : (
-                    index + 1
-                  )}
-                </button>
-              ))}
-          </div>
-        </div>
-      </div>
 
       <CelebrationModal
         isOpen={showCelebration}

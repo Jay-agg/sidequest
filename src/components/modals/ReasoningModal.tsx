@@ -71,7 +71,7 @@ export function ReasoningModal() {
         </div>
       </div>
 
-      <Button className="w-full mt-4" onClick={closeModal}>
+      <Button className="w-full mt-4 h-10 sm:h-11 px-4 sm:px-6 text-sm sm:text-base" onClick={closeModal}>
         Got it
       </Button>
     </>

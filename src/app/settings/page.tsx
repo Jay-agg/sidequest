@@ -162,10 +162,10 @@ function SettingsContent() {
             </p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowClearDialog(false)}>
+            <Button variant="outline" onClick={() => setShowClearDialog(false)} className="h-10 sm:h-11 px-4 sm:px-6 text-sm sm:text-base">
               Cancel
             </Button>
-            <Button onClick={handleClearPlan}>
+            <Button onClick={handleClearPlan} className="h-10 sm:h-11 px-4 sm:px-6 text-sm sm:text-base">
               Start New Plan
             </Button>
           </DialogFooter>
