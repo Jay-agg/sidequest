@@ -34,6 +34,7 @@ interface LearningPlanActions {
     practiceResource?: { name: string; url: string; description: string };
   }>) => void;
   updateDailyMinutes: (minutes: number) => void;
+  regeneratePlan: (dailyMinutes: number) => Promise<void>;
   updateQuizScore: (techniqueId: string, score: number) => void;
   logPractice: (techniqueId: string, minutes: number) => void;
   getTechniqueById: (techniqueId: string) => Technique | undefined;
@@ -203,6 +204,57 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
             updatedAt: Date.now(),
           },
         });
+      },
+
+      regeneratePlan: async (dailyMinutes) => {
+        const { plan } = get();
+        if (!plan) return;
+
+        set({ isGenerating: true, generationError: null });
+
+        try {
+          const response = await fetch("/api/regenerate-plan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              hobby: plan.hobby,
+              goal: plan.goal,
+              dailyMinutes,
+              preserveImage: true,
+              existingImageUrl: plan.hobbyImageUrl,
+              preserveStats: true,
+              existingStats: {
+                totalPracticeMinutes: plan.totalPracticeMinutes,
+                streakDays: plan.streakDays,
+                lastPracticeDate: plan.lastPracticeDate,
+              },
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to regenerate plan");
+          }
+
+          const regeneratedPlan = await response.json();
+          
+          set({
+            plan: {
+              ...regeneratedPlan,
+              id: plan.id,
+              createdAt: plan.createdAt,
+            },
+            isGenerating: false,
+            generationError: null,
+            activeTechniqueId: null,
+          });
+        } catch (error) {
+          set({
+            isGenerating: false,
+            generationError: error instanceof Error ? error.message : "Failed to regenerate plan",
+          });
+          throw error;
+        }
       },
 
       updateQuizScore: (techniqueId, score) => {
