@@ -1,10 +1,13 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import { useIsMobile } from "@/hooks"
 
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false })
+
+let cachedAnimationData: any = null
+let animationDataPromise: Promise<any> | null = null
 
 function useViewportSize() {
   const [size, setSize] = useState({ width: 0, height: 0 })
@@ -26,43 +29,72 @@ interface CircleTransitionProps {
 }
 
 export function CircleTransition({ onComplete }: CircleTransitionProps) {
-  const [animationData, setAnimationData] = useState<any>(null)
+  const [animationData, setAnimationData] = useState<any>(cachedAnimationData)
   const [isFading, setIsFading] = useState(false)
   const viewport = useViewportSize()
   const isMobile = useIsMobile()
+  const onCompleteRef = useRef(onComplete)
+  const hasCompletedRef = useRef(false)
 
   useEffect(() => {
-    fetch("/CircleTransition.json")
-      .then((res) => res.json())
-      .then((data) => {
-        setAnimationData(data)
-      })
-      .catch((err) => {
-        console.error("Failed to load circle transition animation:", err)
-        onComplete()
-      })
+    onCompleteRef.current = onComplete
   }, [onComplete])
 
   useEffect(() => {
-    if (animationData) {
-      const baseDuration = (animationData.op - animationData.ip) / animationData.fr * 1000
-      const duration = baseDuration
-      const fadeStartTime = duration - 200
-      
-      const fadeTimer = setTimeout(() => {
-        setIsFading(true)
-      }, fadeStartTime)
-      
-      const completeTimer = setTimeout(() => {
-        onComplete()
-      }, duration)
-      
-      return () => {
-        clearTimeout(fadeTimer)
-        clearTimeout(completeTimer)
-      }
+    if (cachedAnimationData) {
+      setAnimationData(cachedAnimationData)
+      return
     }
-  }, [animationData, onComplete])
+
+    if (!animationDataPromise) {
+      animationDataPromise = fetch("/CircleTransition.json")
+        .then((res) => res.json())
+        .then((data) => {
+          cachedAnimationData = data
+          return data
+        })
+        .catch((err) => {
+          console.error("Failed to load circle transition animation:", err)
+          animationDataPromise = null
+          throw err
+        })
+    }
+
+    animationDataPromise
+      .then((data) => {
+        setAnimationData(data)
+      })
+      .catch(() => {
+        if (!hasCompletedRef.current) {
+          hasCompletedRef.current = true
+          onCompleteRef.current()
+        }
+      })
+  }, [])
+
+  useEffect(() => {
+    if (!animationData || hasCompletedRef.current) return
+
+    const baseDuration = (animationData.op - animationData.ip) / animationData.fr * 1000
+    const duration = baseDuration
+    const fadeStartTime = duration - 200
+    
+    const fadeTimer = setTimeout(() => {
+      setIsFading(true)
+    }, fadeStartTime)
+    
+    const completeTimer = setTimeout(() => {
+      if (!hasCompletedRef.current) {
+        hasCompletedRef.current = true
+        onCompleteRef.current()
+      }
+    }, duration)
+    
+    return () => {
+      clearTimeout(fadeTimer)
+      clearTimeout(completeTimer)
+    }
+  }, [animationData])
 
   if (!animationData || viewport.width === 0 || viewport.height === 0) {
     return null

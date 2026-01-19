@@ -116,11 +116,16 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
         const state = get();
         if (state.activePlanId === planId) return;
         
+        const uiState = useUIStore.getState();
+        if (uiState.showHobbyTransition) {
+          return;
+        }
+        
         const nextPlan = state.plans.find((p) => p.id === planId) ?? null;
         const nextActiveTechniqueId = state.activeTechniqueByPlan[planId] ?? null;
         
         if (showTransition && typeof window !== "undefined") {
-          useUIStore.getState().setShowHobbyTransition(true);
+          uiState.setShowHobbyTransition(true);
         }
         
         set({

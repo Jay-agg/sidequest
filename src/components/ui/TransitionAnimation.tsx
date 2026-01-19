@@ -96,7 +96,6 @@ export function TransitionAnimation({ onComplete }: TransitionAnimationProps) {
         <Lottie 
           animationData={animationData} 
           loop={false}
-          speed={0.5}
           style={{ 
             width: "100%",
             height: "100%"
