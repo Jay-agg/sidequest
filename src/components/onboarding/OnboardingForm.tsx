@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ArrowRight, ArrowLeft, Zap } from "lucide-react";
-import { Button, Input, Textarea, Slider, Card, CardContent, ThinkingAnimation } from "@/components/ui";
+import { Button, Input, Textarea, Slider, Card, CardContent, ThinkingAnimation, FlickeringGrid } from "@/components/ui";
 import { useLearningPlanStore, useUIStore } from "@/stores";
 import { formatDuration } from "@/lib/utils";
 
@@ -28,6 +28,8 @@ export function OnboardingForm() {
   const setPlan = useLearningPlanStore((state) => state.setPlan);
   const setIsGenerating = useLearningPlanStore((state) => state.setIsGenerating);
   const setUIDailyMinutes = useUIStore((state) => state.setDailyMinutes);
+  const setShowTransition = useUIStore((state) => state.setShowTransition);
+  const isMobile = useUIStore((state) => state.isMobile);
 
   useEffect(() => {
     if (step === "generating" && quotes.length > 0) {
@@ -118,7 +120,14 @@ export function OnboardingForm() {
       setPlan(plan);
       setUIDailyMinutes(plan.dailyMinutes);
       setIsGenerating(false);
-      router.push("/");
+      if (isMobile) {
+        setShowTransition(true);
+        setTimeout(() => {
+          router.push("/");
+        }, 100);
+      } else {
+        router.push("/");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setIsGenerating(false);
@@ -186,9 +195,19 @@ export function OnboardingForm() {
       `}</style>
 
       <div className="min-h-screen flex items-center justify-center p-4 relative">
+        <div className="fixed inset-0 -z-10">
+          <FlickeringGrid
+            squareSize={4}
+            gridGap={6}
+            flickerChance={0.2}
+            color="hsl(220, 15%, 20%)"
+            maxOpacity={0.12}
+            className="opacity-60 dark:opacity-40"
+          />
+        </div>
         {step === "generating" && (
           <motion.div
-            className="fixed inset-0 opacity-20 -z-10"
+            className="fixed inset-0 opacity-20 -z-[9]"
             style={getGradientStyle()}
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.2 }}

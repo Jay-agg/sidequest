@@ -29,6 +29,7 @@ interface UIState {
   modals: ModalState;
   isMobile: boolean;
   activeSessionMinutes: number;
+  showTransition: boolean;
 }
 
 interface UIActions {
@@ -45,6 +46,7 @@ interface UIActions {
   setIsMobile: (isMobile: boolean) => void;
   incrementSessionTime: () => void;
   resetSessionTime: () => void;
+  setShowTransition: (show: boolean) => void;
 }
 
 type UIStore = UIState & UIActions;
@@ -65,6 +67,7 @@ export const useUIStore = create<UIStore>()((set) => ({
   },
   isMobile: false,
   activeSessionMinutes: 0,
+  showTransition: false,
 
   setDailyMinutes: (minutes) => set({ dailyMinutes: minutes }),
 
@@ -146,6 +149,8 @@ export const useUIStore = create<UIStore>()((set) => ({
     })),
 
   resetSessionTime: () => set({ activeSessionMinutes: 0 }),
+
+  setShowTransition: (show) => set({ showTransition: show }),
 }));
 
 export const selectReader = (state: UIStore) => state.reader;

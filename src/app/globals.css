@@ -228,4 +228,13 @@ body {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  
+  @keyframes blink-cursor {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+  
+  .animate-blink-cursor {
+    animation: blink-cursor 1s infinite;
+  }
 }

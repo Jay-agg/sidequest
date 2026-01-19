@@ -8,6 +8,7 @@ import { CircularProgress } from "@/components/ui";
 import { ThemeToggle } from "@/components/theme";
 import { cn } from "@/lib/utils";
 import { PlanSwitcherDesktop } from "./PlanSwitcherDesktop";
+import { AnimatedThemeToggler } from "../theme/AnimatedThemeToggle";
 
 interface HeaderProps {
   className?: string;
@@ -45,7 +46,7 @@ export function Header({ className }: HeaderProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            <ThemeToggle />
+            <AnimatedThemeToggler />
             
             {plan && (
               <div className="hidden sm:flex items-center gap-3 md:gap-4">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { Clock, AlertTriangle } from "lucide-react";
 import { Slider, Card, CardContent, Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui";
 import { LoadingAnimation } from "@/components/ui/LoadingAnimation";
@@ -13,6 +13,25 @@ const depthDescriptions: Record<DepthLevel, string> = {
   basic: "Core concepts only - quick daily practice",
   intermediate: "Concepts with exercises - balanced approach",
   deep: "Full mastery with variations - comprehensive learning",
+};
+
+const quotes: Record<number, string> = {
+  10: "Small steps, big dreams!",
+  15: "Every minute counts!",
+  20: "Starting strong!",
+  25: "Building momentum!",
+  30: "You're on track!",
+  35: "Amazing dedication!",
+  40: "Incredible commitment!",
+  45: "Woo, you're unstoppable!",
+  50: "Outstanding choice!",
+  55: "You're absolutely crushing it!",
+  60: "Legendary commitment!",
+};
+
+const getQuoteForMinutes = (minutes: number): string => {
+  const roundedMinutes = Math.round(minutes / 5) * 5;
+  return quotes[roundedMinutes] || quotes[30];
 };
 
 const timeToDepth = (minutes: number): DepthLevel => {
@@ -30,19 +49,25 @@ export function CommitmentDial() {
   const [localValue, setLocalValue] = useState([dailyMinutes]);
   const [showWarning, setShowWarning] = useState(false);
   const [pendingMinutes, setPendingMinutes] = useState<number | null>(null);
+  const [isAdjusting, setIsAdjusting] = useState(false);
+  const [lastCommittedValue, setLastCommittedValue] = useState(dailyMinutes);
 
   useEffect(() => {
     setLocalValue([dailyMinutes]);
+    setLastCommittedValue(dailyMinutes);
   }, [dailyMinutes]);
 
   const currentDepth = timeToDepth(dailyMinutes);
 
   const handleValueChange = useCallback((value: number[]) => {
     setLocalValue(value);
+    setIsAdjusting(true);
   }, []);
 
   const handleValueCommit = useCallback((value: number[]) => {
     const newMinutes = value[0];
+    setIsAdjusting(false);
+    setLastCommittedValue(newMinutes);
     
     if (newMinutes === dailyMinutes) {
       return;
@@ -139,16 +164,33 @@ export function CommitmentDial() {
             </div>
           )}
 
-          <motion.div
-            key={timeToDepth(localValue[0])}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-lavender/30"
-          >
-            <p className="text-xs sm:text-sm text-foreground">
-              {depthDescriptions[timeToDepth(localValue[0])]}
-            </p>
-          </motion.div>
+          <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-lavender/30 min-h-[3rem] sm:min-h-[3.5rem] flex items-center">
+            <AnimatePresence mode="wait">
+              {isAdjusting ? (
+                <motion.p
+                  key={`quote-${localValue[0]}`}
+                  initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  className="text-xs sm:text-sm text-foreground w-full text-center italic"
+                >
+                  "{getQuoteForMinutes(localValue[0])}"
+                </motion.p>
+              ) : (
+                <motion.p
+                  key={`description-${lastCommittedValue}`}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.2 }}
+                  className="text-xs sm:text-sm text-foreground w-full text-center"
+                >
+                  {depthDescriptions[timeToDepth(lastCommittedValue)]}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
         </CardContent>
       </Card>
 

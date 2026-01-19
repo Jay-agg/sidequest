@@ -3,6 +3,7 @@ import { Public_Sans, Lora } from "next/font/google";
 import "regenerator-runtime/runtime";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme";
+import { PlanSwitcherProvider } from "@/components/layout/PlanSwitcherContext";
 
 const publicSans = Public_Sans({
   subsets: ["latin"],
@@ -34,7 +35,9 @@ export default function RootLayout({
     <html lang="en" className={`${publicSans.variable} ${lora.variable}`} suppressHydrationWarning>
       <body className="min-h-screen antialiased">
         <ThemeProvider>
-          {children}
+          <PlanSwitcherProvider>
+            {children}
+          </PlanSwitcherProvider>
         </ThemeProvider>
       </body>
     </html>

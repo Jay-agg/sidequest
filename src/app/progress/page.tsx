@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
+import confetti from "canvas-confetti";
 import { Trophy, Clock, Target, TrendingUp } from "lucide-react";
 import { useLearningPlanStore, useUIStore } from "@/stores";
-import { useIsMobile } from "@/hooks";
-import { Header, MobileNav } from "@/components/layout";
-import { Card, CardContent, CircularProgress } from "@/components/ui";
+import { useIsMobile, useScrollAnimation } from "@/hooks";
+import { Header, MobileNav, PlanSwitcher } from "@/components/layout";
+import { Card, CardContent, CircularProgress, FlickeringGrid } from "@/components/ui";
 import { OnboardingForm } from "@/components/onboarding";
 import { formatDuration } from "@/lib/utils";
 import type { MasteryState } from "@/types";
@@ -28,6 +29,48 @@ function ProgressContent() {
     setIsMobile(isMobile);
   }, [isMobile, setIsMobile]);
 
+  const confettiFiredRef = useRef(false);
+  
+  useEffect(() => {
+    if (!plan || confettiFiredRef.current) return;
+    
+    const allMastered = progress.completed === progress.total && progress.total > 0;
+    
+    if (allMastered) {
+      confettiFiredRef.current = true;
+      setTimeout(() => {
+        const duration = 5000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+        function randomInRange(min: number, max: number) {
+          return Math.random() * (max - min) + min;
+        }
+
+        const interval: NodeJS.Timeout = setInterval(function() {
+          const timeLeft = animationEnd - Date.now();
+
+          if (timeLeft <= 0) {
+            return clearInterval(interval);
+          }
+
+          const particleCount = 50 * (timeLeft / duration);
+          
+          confetti({
+            ...defaults,
+            particleCount,
+            origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+          });
+          confetti({
+            ...defaults,
+            particleCount,
+            origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+          });
+        }, 250);
+      }, 500);
+    }
+  }, [plan, progress.completed, progress.total]);
+
   if (!plan) return <OnboardingForm />;
 
   const techniquesByState = plan.techniques.reduce((acc, t) => {
@@ -48,123 +91,99 @@ function ProgressContent() {
     <div className="min-h-screen pb-20 sm:pb-0">
       <Header />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        <h1 className="font-display text-3xl font-bold text-foreground mb-8">
+      <main className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-4 sm:mb-8">
           Your Progress
         </h1>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0 }}
-          >
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-2 lg:grid-cols-4 mb-4 sm:mb-8">
+          <StatCardWrapper index={0}>
             <Card className="h-full">
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-4">
-                  <Trophy className="h-6 w-6 text-accent" />
+              <CardContent className="p-3 sm:p-6 flex flex-col items-center text-center">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-accent/10 flex items-center justify-center mb-2 sm:mb-4">
+                  <Trophy className="h-4 w-4 sm:h-6 sm:w-6 text-accent" />
                 </div>
-                <p className="text-3xl font-display font-bold text-foreground">
+                <p className="text-xl sm:text-3xl font-display font-bold text-foreground">
                   {progress.completed}
                 </p>
-                <p className="text-sm text-foreground-muted">Techniques Mastered</p>
+                <p className="text-xs sm:text-sm text-foreground-muted">Techniques Mastered</p>
               </CardContent>
             </Card>
-          </motion.div>
+          </StatCardWrapper>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
+          <StatCardWrapper index={1}>
             <Card className="h-full">
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <div className="w-12 h-12 rounded-full bg-peach/50 flex items-center justify-center mb-4">
-                  <Target className="h-6 w-6 text-peach-dark" />
+              <CardContent className="p-3 sm:p-6 flex flex-col items-center text-center">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-peach/50 flex items-center justify-center mb-2 sm:mb-4">
+                  <Target className="h-4 w-4 sm:h-6 sm:w-6 text-peach-dark" />
                 </div>
-                <p className="text-3xl font-display font-bold text-foreground">
+                <p className="text-xl sm:text-3xl font-display font-bold text-foreground">
                   {progress.total}
                 </p>
-                <p className="text-sm text-foreground-muted">Total Techniques</p>
+                <p className="text-xs sm:text-sm text-foreground-muted">Total Techniques</p>
               </CardContent>
             </Card>
-          </motion.div>
+          </StatCardWrapper>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
+          <StatCardWrapper index={2}>
             <Card className="h-full">
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <div className="w-12 h-12 rounded-full bg-sky/50 flex items-center justify-center mb-4">
-                  <Clock className="h-6 w-6 text-sky-dark" />
+              <CardContent className="p-3 sm:p-6 flex flex-col items-center text-center">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-sky/50 flex items-center justify-center mb-2 sm:mb-4">
+                  <Clock className="h-4 w-4 sm:h-6 sm:w-6 text-sky-dark" />
                 </div>
-                <p className="text-3xl font-display font-bold text-foreground">
+                <p className="text-xl sm:text-3xl font-display font-bold text-foreground">
                   {formatDuration(completedMinutes)}
                 </p>
-                <p className="text-sm text-foreground-muted">Time Invested</p>
+                <p className="text-xs sm:text-sm text-foreground-muted">Time Invested</p>
               </CardContent>
             </Card>
-          </motion.div>
+          </StatCardWrapper>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
+          <StatCardWrapper index={3}>
             <Card className="h-full">
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <div className="w-12 h-12 rounded-full bg-mint/50 flex items-center justify-center mb-4">
-                  <TrendingUp className="h-6 w-6 text-mint-dark" />
+              <CardContent className="p-3 sm:p-6 flex flex-col items-center text-center">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-mint/50 flex items-center justify-center mb-2 sm:mb-4">
+                  <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-mint-dark" />
                 </div>
-                <p className="text-3xl font-display font-bold text-foreground">
+                <p className="text-xl sm:text-3xl font-display font-bold text-foreground">
                   {formatDuration(plan.dailyMinutes)}
                 </p>
-                <p className="text-sm text-foreground-muted">Daily Goal</p>
+                <p className="text-xs sm:text-sm text-foreground-muted">Daily Goal</p>
               </CardContent>
             </Card>
-          </motion.div>
+          </StatCardWrapper>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+          <ScrollSectionWrapper index={0}>
             <Card>
-              <CardContent className="p-6">
-                <h2 className="font-display text-xl font-semibold text-foreground mb-6">
+              <CardContent className="p-4 sm:p-6">
+                <h2 className="font-display text-lg sm:text-xl font-semibold text-foreground mb-4 sm:mb-6">
                   Overall Progress
                 </h2>
                 <div className="flex items-center justify-center">
                   <CircularProgress
                     value={progress.percentage}
-                    size={180}
-                    strokeWidth={12}
+                    size={isMobile ? 120 : 180}
+                    strokeWidth={isMobile ? 8 : 12}
                   />
                 </div>
-                <p className="text-center text-foreground-muted mt-4">
+                <p className="text-center text-xs sm:text-sm text-foreground-muted mt-3 sm:mt-4">
                   {progress.completed === progress.total
                     ? "Congratulations! You have mastered all techniques!"
                     : `${progress.total - progress.completed} techniques remaining`}
                 </p>
               </CardContent>
             </Card>
-          </motion.div>
+          </ScrollSectionWrapper>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
+          <ScrollSectionWrapper index={1}>
             <Card>
-              <CardContent className="p-6">
-                <h2 className="font-display text-xl font-semibold text-foreground mb-6">
+              <CardContent className="p-4 sm:p-6">
+                <h2 className="font-display text-lg sm:text-xl font-semibold text-foreground mb-4 sm:mb-6">
                   Status Breakdown
                 </h2>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {(["mastered", "practicing", "learning", "unstarted"] as MasteryState[]).map(
                     (state) => {
                       const count = techniquesByState[state] || 0;
@@ -185,12 +204,12 @@ function ProgressContent() {
                       return (
                         <div key={state}>
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-medium text-foreground">
+                            <span className="text-xs sm:text-sm font-medium text-foreground">
                               {labels[state]}
                             </span>
-                            <span className="text-sm text-foreground-muted">{count}</span>
+                            <span className="text-xs sm:text-sm text-foreground-muted">{count}</span>
                           </div>
-                          <div className="h-2 bg-foreground-subtle/10 rounded-full overflow-hidden">
+                          <div className="h-1.5 sm:h-2 bg-foreground-subtle/10 rounded-full overflow-hidden">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${percentage}%` }}
@@ -205,21 +224,16 @@ function ProgressContent() {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </ScrollSectionWrapper>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="mt-6"
-        >
+        <ScrollSectionWrapper index={2} className="mt-4 sm:mt-6">
           <Card>
-            <CardContent className="p-6">
-              <h2 className="font-display text-xl font-semibold text-foreground mb-4">
+            <CardContent className="p-4 sm:p-6">
+              <h2 className="font-display text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">
                 Technique Journey
               </h2>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {plan.techniques
                   .sort((a, b) => a.order - b.order)
                   .map((technique, index) => {
@@ -233,20 +247,20 @@ function ProgressContent() {
                     return (
                       <div
                         key={technique.id}
-                        className="flex items-center gap-4 p-3 rounded-xl hover:bg-lavender/20 transition-all"
+                        className="flex items-center gap-2 sm:gap-4 p-2 sm:p-3 rounded-xl hover:bg-lavender/20 transition-all"
                       >
                         <div
-                          className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center font-medium text-sm ${stateColors[technique.masteryState]}`}
+                          className={`flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center font-medium text-xs sm:text-sm ${stateColors[technique.masteryState]}`}
                         >
                           {index + 1}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-foreground">{technique.name}</p>
+                          <p className="font-medium text-sm sm:text-base text-foreground truncate">{technique.name}</p>
                           <p className="text-xs text-foreground-muted capitalize">
                             {technique.masteryState.replace("_", " ")}
                           </p>
                         </div>
-                        <span className="text-sm text-foreground-subtle">
+                        <span className="text-xs sm:text-sm text-foreground-subtle whitespace-nowrap">
                           {formatDuration(technique.estimatedMinutes)}
                         </span>
                       </div>
@@ -255,12 +269,73 @@ function ProgressContent() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </ScrollSectionWrapper>
       </main>
 
       <MobileNav />
+      <PlanSwitcher />
     </div>
   );
+}
+
+function StatCardWrapper({ children, index }: { children: React.ReactNode; index: number }) {
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 })
+  const isMobile = useIsMobile()
+
+  const gridColors = [
+    "rgb(139, 127, 212)", // accent/purple for Techniques Mastered
+    "rgb(255, 203, 184)", // peach/orange for Total Techniques
+    "rgb(168, 216, 255)", // sky/blue for Time Invested
+    "rgb(168, 235, 207)", // mint/green for Daily Goal
+  ]
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={isMobile ? { opacity: 0, y: 20, scale: 0.95 } : { opacity: 1, y: 0, scale: 1 }}
+      animate={isMobile && isVisible ? { opacity: 1, y: 0, scale: 1 } : {}}
+      transition={{ 
+        duration: 0.5, 
+        delay: index * 0.1,
+        ease: [0.16, 1, 0.3, 1]
+      }}
+      className="relative"
+    >
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <FlickeringGrid
+            squareSize={2}
+            gridGap={3}
+            flickerChance={0.3}
+            color={gridColors[index]}
+            maxOpacity={0.4}
+          />
+        </div>
+        <div className="relative z-10">{children}</div>
+      </div>
+    </motion.div>
+  )
+}
+
+function ScrollSectionWrapper({ children, index, className }: { children: React.ReactNode; index: number; className?: string }) {
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 })
+  const isMobile = useIsMobile()
+
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      initial={isMobile ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
+      animate={isMobile && isVisible ? { opacity: 1, y: 0 } : {}}
+      transition={{ 
+        duration: 0.6, 
+        delay: index * 0.1,
+        ease: [0.16, 1, 0.3, 1]
+      }}
+    >
+      {children}
+    </motion.div>
+  )
 }
 
 export default function ProgressPage() {

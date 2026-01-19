@@ -38,3 +38,7 @@ export { Textarea } from "./textarea";
 export { LoadingSpinner, LoadingDots, LoadingPulse } from "./loading";
 export { ThinkingAnimation } from "./ThinkingAnimation";
 export { LoadingAnimation } from "./LoadingAnimation";
+export { TypingAnimation } from "./TypingAnimation";
+export { NumberTicker } from "./NumberTicker";
+export { TransitionAnimation } from "./TransitionAnimation";
+export { FlickeringGrid } from "./FlickeringGrid";

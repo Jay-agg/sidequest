@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
 import {
   ArrowLeft,
   Play,
@@ -21,6 +22,7 @@ import { useLearningPlanStore } from "@/stores";
 import { Quiz, VideoPlayer, PracticeTimer } from "@/components/learning";
 import { CelebrationModal } from "@/components/modals";
 import { FlashCards, TeachBackMode } from "@/components/gamification";
+import { PlanSwitcher } from "@/components/layout";
 import type { MasteryState, QuizQuestion } from "@/types";
 
 type Tab = "learn" | "practice" | "quiz" | "flashcards" | "teachback";
@@ -106,12 +108,48 @@ export default function LearnPage() {
   }, [technique, logPractice, updateTechniqueMastery]);
 
   const handleMarkMastered = useCallback(() => {
-    if (!technique) return;
+    if (!technique || !plan) return;
     
     setCelebratedTechniqueName(technique.name);
     setShowCelebration(true);
     updateTechniqueMastery(technique.id, "mastered");
-  }, [technique, updateTechniqueMastery]);
+    
+    const masteredCount = plan.techniques.filter((t) => t.masteryState === "mastered").length;
+    const willBeAllMastered = masteredCount + 1 === plan.techniques.length;
+    
+    if (willBeAllMastered) {
+      setTimeout(() => {
+        const duration = 5000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+        function randomInRange(min: number, max: number) {
+          return Math.random() * (max - min) + min;
+        }
+
+        const interval: NodeJS.Timeout = setInterval(function() {
+          const timeLeft = animationEnd - Date.now();
+
+          if (timeLeft <= 0) {
+            return clearInterval(interval);
+          }
+
+          const particleCount = 50 * (timeLeft / duration);
+          
+          confetti({
+            ...defaults,
+            particleCount,
+            origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+          });
+          confetti({
+            ...defaults,
+            particleCount,
+            origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+          });
+        }, 250);
+      }, 500);
+    }
+  }, [technique, plan, updateTechniqueMastery]);
 
   const handleCelebrationClose = useCallback(() => {
     setShowCelebration(false);
@@ -459,6 +497,7 @@ export default function LearnPage() {
         techniqueName={celebratedTechniqueName}
         motivationalQuotes={plan?.motivationalQuotes}
       />
+      <PlanSwitcher />
     </div>
   );
 }

@@ -77,11 +77,13 @@ export function TechniqueCard({
       whileHover={{ scale: 1.01 }}
       transition={{ duration: 0.2 }}
       id={`technique-${technique.id}`}
+      style={{ opacity: "inherit" }}
     >
       <Card
         className={cn(
-          "relative overflow-hidden transition-all",
-          isActive && "ring-2 ring-accent ring-offset-2 ring-offset-background",
+          "relative overflow-hidden transition-all duration-300",
+          "hover:shadow-[0_4px_16px_rgba(0,0,0,0.08),0_12px_32px_rgba(0,0,0,0.12)]",
+          isActive && "ring-2 ring-accent ring-offset-2 ring-offset-background shadow-[0_4px_16px_rgba(139,127,212,0.2)]",
           isMastered && "bg-mint/5",
           isLocked && "opacity-60"
         )}

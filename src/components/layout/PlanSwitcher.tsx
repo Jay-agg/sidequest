@@ -6,6 +6,7 @@ import { Plus, X, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLearningPlanStore } from "@/stores";
 import { Button } from "@/components/ui";
+import { usePlanSwitcherContext } from "./PlanSwitcherContext";
 import type { LearningPlan } from "@/types";
 
 type Mode = "view" | "edit";
@@ -16,10 +17,9 @@ export function PlanSwitcher() {
   const activePlanId = useLearningPlanStore((s) => s.activePlanId);
   const setActivePlan = useLearningPlanStore((s) => s.setActivePlan);
   const deletePlan = useLearningPlanStore((s) => s.deletePlan);
-  const [open, setOpen] = useState(false);
+  const { open, setOpen, isZooming } = usePlanSwitcherContext();
   const [mode, setMode] = useState<Mode>("view");
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [isZooming, setIsZooming] = useState(false);
   const [viewingAddCard, setViewingAddCard] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -27,14 +27,6 @@ export function PlanSwitcher() {
     const idx = plans.findIndex((p) => p.id === activePlanId);
     return idx >= 0 ? idx : 0;
   }, [plans, activePlanId]);
-
-  const handleOpen = () => {
-    setIsZooming(true);
-    setTimeout(() => {
-      setOpen(true);
-      setIsZooming(false);
-    }, 300);
-  };
 
   const handleClose = () => {
     setOpen(false);
@@ -103,15 +95,6 @@ export function PlanSwitcher() {
 
   return (
     <>
-      <button
-        type="button"
-        className="sm:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-50 w-14 h-14 rounded-full bg-accent text-accent-foreground border-2 border-card-border flex items-center justify-center shadow-lg active:scale-95 transition-all"
-        onClick={handleOpen}
-        aria-label="Switch hobby"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
-
       <AnimatePresence>
         {isZooming && (
           <motion.div
@@ -454,7 +437,7 @@ function AddHobbyCard({ onClick, onSwipeLeft, isActive = false }: AddHobbyCardPr
       initial={{ opacity: 0, x: isActive ? 0 : 20 }}
       animate={{ opacity: baseOpacity, x: 0 }}
       exit={{ opacity: 0, x: isActive ? 0 : 20 }}
-      onClick={isActive ? undefined : onClick}
+      onClick={onClick}
       whileTap={{ scale: isActive ? 0.98 : 0.83 }}
     >
       <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border-[3px] border-black border-dashed bg-card/50">
@@ -470,15 +453,6 @@ function AddHobbyCard({ onClick, onSwipeLeft, isActive = false }: AddHobbyCardPr
           <p className="text-sm text-white/80 text-center mb-4">
             Create a new learning plan
           </p>
-          {isActive && (
-            <Button
-              className="w-full h-12 text-base"
-              onClick={onClick}
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Create new hobby
-            </Button>
-          )}
         </div>
       </div>
     </motion.div>

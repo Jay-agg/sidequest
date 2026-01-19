@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Trash2, RotateCcw, Download, Upload, AlertTriangle } from "lucide-react";
 import { useLearningPlanStore, useUIStore, useSyncStore } from "@/stores";
 import { useIsMobile } from "@/hooks";
-import { Header, MobileNav } from "@/components/layout";
+import { Header, MobileNav, PlanSwitcher } from "@/components/layout";
 import { CommitmentDial } from "@/components/commitment";
 import {
   Button,
@@ -170,6 +170,7 @@ function SettingsContent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <PlanSwitcher />
     </div>
   );
 }

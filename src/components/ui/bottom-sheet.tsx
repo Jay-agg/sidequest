@@ -32,8 +32,9 @@ const BottomSheetContent = React.forwardRef<
     <BottomSheetOverlay />
     <Drawer.Content
       ref={ref}
+      style={{ backgroundColor: "#FFFFFF" }}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto max-h-[90vh] flex-col rounded-t-3xl bg-card-bg",
+        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto max-h-[90vh] flex-col rounded-t-3xl border-t-[3px] border-l-[3px] border-r-[3px] border-card-border",
         className
       )}
       {...props}
