@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence, PanInfo, useMotionValue, useTransform } from "framer-motion";
 import { Plus, X, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -28,11 +28,18 @@ export function PlanSwitcher() {
     return idx >= 0 ? idx : 0;
   }, [plans, activePlanId]);
 
+  const [viewedIndex, setViewedIndex] = useState(activeIndex);
+
+  useEffect(() => {
+    setViewedIndex(activeIndex);
+  }, [activeIndex]);
+
   const handleClose = () => {
     setOpen(false);
     setMode("view");
     setDeletingId(null);
     setViewingAddCard(false);
+    setViewedIndex(activeIndex);
   };
 
   const handleAdd = () => {
@@ -54,30 +61,31 @@ export function PlanSwitcher() {
     const velocityX = info.velocity.x;
     const threshold = 80;
     const swipe = Math.abs(offsetX) > threshold || Math.abs(velocityX) > 500;
-    if (!swipe) return;
+    if (!swipe) {
+      return;
+    }
     
     if (viewingAddCard) {
       if (offsetX > 0) {
         setViewingAddCard(false);
+        setViewedIndex(activeIndex);
       }
       return;
     }
     
     if (offsetX < 0) {
-      if (activeIndex === plans.length - 1) {
+      if (viewedIndex === plans.length - 1) {
         setViewingAddCard(true);
       } else {
-        const nextIndex = activeIndex + 1;
+        const nextIndex = viewedIndex + 1;
         if (nextIndex < plans.length) {
-          const next = plans[nextIndex];
-          if (next) setActivePlan(next.id);
+          setViewedIndex(nextIndex);
         }
       }
     } else {
-      const prevIndex = activeIndex - 1;
+      const prevIndex = viewedIndex - 1;
       if (prevIndex >= 0) {
-        const prev = plans[prevIndex];
-        if (prev) setActivePlan(prev.id);
+        setViewedIndex(prevIndex);
       }
     }
   };
@@ -155,11 +163,12 @@ export function PlanSwitcher() {
                         <>
                           {plans.map((p, idx) => {
                             const isActive = p.id === activePlanId;
+                            const isViewed = idx === viewedIndex;
                             const mastered = p.techniques.filter((t) => t.masteryState === "mastered").length;
                             const canSwipeLeft = idx < plans.length - 1;
-                            const canSwipeRight = true;
+                            const canSwipeRight = idx > 0;
                             
-                            if (isActive) {
+                            if (isViewed) {
                               return (
                                 <PlanCard
                                   key={p.id}
@@ -170,17 +179,17 @@ export function PlanSwitcher() {
                                   canSwipeRight={canSwipeRight}
                                   onDragEnd={mode === "view" ? onDragEnd : (_e, info) => onDragEndEdit(p.id, info)}
                                   onSelect={() => {
-                                    setActivePlan(p.id);
+                                    setActivePlan(p.id, true);
                                     handleClose();
                                   }}
                                   onDelete={() => handleDelete(p.id)}
                                   isDeleting={deletingId === p.id}
-                                  isActive={true}
+                                  isActive={isActive}
                                 />
                               );
                             }
                             
-                            const offset = idx - activeIndex;
+                            const offset = idx - viewedIndex;
                             if (Math.abs(offset) > 1) return null;
                             
                             return (
@@ -189,12 +198,14 @@ export function PlanSwitcher() {
                                 plan={p}
                                 mastered={mastered}
                                 offset={offset}
-                                onClick={() => setActivePlan(p.id)}
+                                onClick={() => {
+                                  setViewedIndex(idx);
+                                }}
                               />
                             );
                           })}
                           
-                          {activeIndex === plans.length - 1 && (
+                          {viewedIndex === plans.length - 1 && (
                             <AddHobbyCard 
                               onClick={() => setViewingAddCard(true)}
                               isActive={false}
@@ -234,22 +245,22 @@ export function PlanSwitcher() {
             </div>
 
             <div className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-2">
-              {plans.map((p) => {
-                const isActive = p.id === activePlanId && !viewingAddCard;
+              {plans.map((p, idx) => {
+                const isViewed = idx === viewedIndex && !viewingAddCard;
                 const isDeleting = deletingId === p.id;
                 return (
                   <motion.button
                     key={p.id}
                     type="button"
                     onClick={() => {
-                      setActivePlan(p.id);
+                      setViewedIndex(idx);
                       setViewingAddCard(false);
                     }}
                     disabled={isDeleting}
                     className={`h-2 rounded-full transition-all ${
-                      isActive ? "w-8 bg-accent" : "w-2 bg-muted"
+                      isViewed ? "w-8 bg-accent" : "w-2 bg-muted"
                     }`}
-                    aria-label={`Switch to ${p.hobby}`}
+                    aria-label={`View ${p.hobby}`}
                     whileHover={{ scale: 1.2 }}
                     whileTap={{ scale: 0.9 }}
                   />
@@ -325,12 +336,26 @@ function PlanCard({
   const opacity = useTransform(x, [-300, 0, 300], [0.2, 1, 0.2]);
   const scale = useTransform(x, [-300, 0, 300], [0.85, 1, 0.85]);
 
+  const handleDragEnd = (event: any, info: PanInfo) => {
+    const offsetX = info.offset.x;
+    const velocityX = info.velocity.x;
+    const threshold = 80;
+    const swipe = Math.abs(offsetX) > threshold || Math.abs(velocityX) > 500;
+    
+    if (!swipe) {
+      x.set(0);
+      return;
+    }
+    
+    onDragEnd(event, info);
+  };
+
   return (
     <motion.div
       drag={mode === "view" ? "x" : "y"}
       dragConstraints={mode === "view" ? { left: canSwipeRight ? -300 : 0, right: canSwipeLeft ? 300 : 0 } : { top: 0, bottom: 0 }}
       dragElastic={mode === "view" ? 0.2 : 0.2}
-      onDragEnd={onDragEnd}
+      onDragEnd={handleDragEnd}
       style={{ x, opacity, scale, zIndex: 10 }}
       whileTap={{ scale: 0.98 }}
       className="w-full relative"
@@ -386,10 +411,14 @@ function PlanCard({
               </Button>
             ) : (
               <Button
-                className="w-full h-12 text-base"
+                variant={isActive ? "default" : "outline"}
+                className={isActive 
+                  ? "w-full h-12 text-base" 
+                  : "w-full h-12 text-base border-white/30 text-white bg-white/10 hover:bg-white/20 hover:border-white/50 backdrop-blur-sm"
+                }
                 onClick={onSelect}
               >
-                Continue this hobby
+                {isActive ? "Continue this hobby" : "Switch to this hobby"}
               </Button>
             )}
           </div>

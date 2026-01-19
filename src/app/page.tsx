@@ -24,6 +24,7 @@ function LearningDashboard() {
   const plan = useLearningPlanStore((state) => state.plan);
   const updateTechniqueMastery = useLearningPlanStore((state) => state.updateTechniqueMastery);
   const isTechniqueLocked = useLearningPlanStore((state) => state.isTechniqueLocked);
+  const isMobile = useIsMobile();
   
   const progress = useMemo(() => {
     if (!plan) return { completed: 0, total: 0, percentage: 0 };
@@ -107,8 +108,13 @@ function LearningDashboard() {
         <div className="mb-8">
           {plan.hobbyImageUrl && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 30, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              whileHover={!isMobile ? {
+                scale: 1.01,
+                transition: { duration: 0.3 }
+              } : {}}
               className="mb-8 rounded-3xl overflow-hidden border-[3px] border-card-border"
             >
               <div className="relative aspect-[16/9] sm:aspect-[21/9] md:aspect-[21/7]">
@@ -270,9 +276,14 @@ function LearningDashboard() {
 
         <div className="grid gap-6 sm:gap-8 lg:grid-cols-[2fr_1fr]">
           <ScrollSection>
-            <h2 className="font-display text-xl sm:text-2xl font-semibold text-foreground mb-4 sm:mb-6">
+            <motion.h2 
+              className="font-display text-xl sm:text-2xl font-semibold text-foreground mb-4 sm:mb-6"
+              initial={!isMobile ? { opacity: 0, x: -20 } : {}}
+              animate={!isMobile ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
               Your Techniques
-            </h2>
+            </motion.h2>
             <div className="space-y-4">
               <AnimatePresence>
                 {plan.techniques
@@ -298,7 +309,12 @@ function LearningDashboard() {
 
           <div className="hidden lg:block">
             <ScrollSection>
-              <div className="sticky top-24">
+              <motion.div 
+                className="sticky top-24"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
                 <h2 className="font-display text-xl font-semibold text-foreground mb-4">
                   Progress Path
                 </h2>
@@ -312,7 +328,7 @@ function LearningDashboard() {
                     selectedId={nextTechnique?.id}
                   />
                 </Card>
-              </div>
+              </motion.div>
             </ScrollSection>
           </div>
         </div>
@@ -372,15 +388,20 @@ function StatCard({ children, index }: { children: React.ReactNode; index: numbe
   return (
     <motion.div
       ref={ref}
-      initial={isMobile ? { opacity: 0, y: 20, scale: 0.95 } : { opacity: 1, y: 0, scale: 1 }}
+      initial={isMobile ? { opacity: 0, y: 20, scale: 0.95 } : { opacity: 0, y: 30, scale: 0.9 }}
       animate={
         isMobile 
           ? (isVisible ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 20, scale: 0.95 })
           : { opacity: 1, y: 0, scale: 1 }
       }
+      whileHover={!isMobile ? { 
+        y: -4, 
+        scale: 1.02,
+        transition: { duration: 0.2 }
+      } : {}}
       transition={{ 
-        duration: 0.5, 
-        delay: index * 0.1,
+        duration: 0.6, 
+        delay: isMobile ? index * 0.1 : index * 0.15,
         ease: [0.16, 1, 0.3, 1]
       }}
       className="relative"
@@ -404,18 +425,25 @@ function StatCard({ children, index }: { children: React.ReactNode; index: numbe
 function ScrollSection({ children }: { children: React.ReactNode }) {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 })
   const isMobile = useIsMobile()
+  const [hasAnimated, setHasAnimated] = useState(false)
+
+  useEffect(() => {
+    if (!isMobile && isVisible && !hasAnimated) {
+      setHasAnimated(true)
+    }
+  }, [isMobile, isVisible, hasAnimated])
 
   return (
     <motion.div
       ref={ref}
-      initial={isMobile ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
+      initial={isMobile ? { opacity: 0, y: 30 } : { opacity: 0, y: 40 }}
       animate={
         isMobile 
           ? (isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 })
-          : { opacity: 1, y: 0 }
+          : (hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 })
       }
       transition={{ 
-        duration: 0.6, 
+        duration: 0.8, 
         ease: [0.16, 1, 0.3, 1]
       }}
     >

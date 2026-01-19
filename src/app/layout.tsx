@@ -4,6 +4,7 @@ import "regenerator-runtime/runtime";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme";
 import { PlanSwitcherProvider } from "@/components/layout/PlanSwitcherContext";
+import { HobbyTransitionWrapper } from "@/components/layout/HobbyTransitionWrapper";
 
 const publicSans = Public_Sans({
   subsets: ["latin"],
@@ -36,7 +37,9 @@ export default function RootLayout({
       <body className="min-h-screen antialiased">
         <ThemeProvider>
           <PlanSwitcherProvider>
-            {children}
+            <HobbyTransitionWrapper>
+              {children}
+            </HobbyTransitionWrapper>
           </PlanSwitcherProvider>
         </ThemeProvider>
       </body>

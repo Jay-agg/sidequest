@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { LearningPlan, Technique, MasteryState } from "@/types";
 import { generateId } from "@/lib/utils";
+import { useUIStore } from "./uiStore";
 
 interface LearningPlanState {
   plans: LearningPlan[];
@@ -16,7 +17,7 @@ interface LearningPlanState {
 interface LearningPlanActions {
   setPlan: (plan: LearningPlan) => void;
   clearPlan: () => void;
-  setActivePlan: (planId: string) => void;
+  setActivePlan: (planId: string, showTransition?: boolean) => void;
   deletePlan: (planId: string) => void;
   setIsGenerating: (isGenerating: boolean) => void;
   setGenerationError: (error: string | null) => void;
@@ -111,10 +112,17 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
         });
       },
 
-      setActivePlan: (planId) => {
+      setActivePlan: (planId, showTransition = false) => {
         const state = get();
+        if (state.activePlanId === planId) return;
+        
         const nextPlan = state.plans.find((p) => p.id === planId) ?? null;
         const nextActiveTechniqueId = state.activeTechniqueByPlan[planId] ?? null;
+        
+        if (showTransition && typeof window !== "undefined") {
+          useUIStore.getState().setShowHobbyTransition(true);
+        }
+        
         set({
           activePlanId: planId,
           plan: nextPlan,

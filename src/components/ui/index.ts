@@ -41,4 +41,5 @@ export { LoadingAnimation } from "./LoadingAnimation";
 export { TypingAnimation } from "./TypingAnimation";
 export { NumberTicker } from "./NumberTicker";
 export { TransitionAnimation } from "./TransitionAnimation";
+export { CircleTransition } from "./CircleTransition";
 export { FlickeringGrid } from "./FlickeringGrid";

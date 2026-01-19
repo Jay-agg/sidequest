@@ -136,7 +136,7 @@ export function PlanSwitcherDesktop() {
                           )}
                           onClick={() => {
                             if (mode === "view") {
-                              setActivePlan(p.id);
+                              setActivePlan(p.id, true);
                               setOpen(false);
                             }
                           }}
@@ -206,7 +206,7 @@ export function PlanSwitcherDesktop() {
                                 variant={isActive ? "default" : "outline"}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setActivePlan(p.id);
+                                  setActivePlan(p.id, true);
                                   setOpen(false);
                                 }}
                               >

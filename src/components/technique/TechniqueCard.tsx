@@ -8,6 +8,7 @@ import type { Technique, MasteryState } from "@/types";
 import { Button, Card, CardContent, Progress } from "@/components/ui";
 import { cn, formatDuration } from "@/lib/utils";
 import { useLearningPlanStore } from "@/stores";
+import { useIsMobile } from "@/hooks";
 
 interface TechniqueCardProps {
   technique: Technique;
@@ -71,10 +72,16 @@ export function TechniqueCard({
     ? Math.min(((technique.practiceMinutes || 0) / technique.estimatedMinutes) * 100, 100)
     : 0;
 
+  const isMobile = useIsMobile()
+
   return (
     <motion.div
       layout
-      whileHover={{ scale: 1.01 }}
+      whileHover={!isMobile ? { 
+        scale: 1.02, 
+        y: -4,
+        transition: { duration: 0.2, ease: "easeOut" }
+      } : { scale: 1.01 }}
       transition={{ duration: 0.2 }}
       id={`technique-${technique.id}`}
       style={{ opacity: "inherit" }}
