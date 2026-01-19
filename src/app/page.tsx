@@ -6,12 +6,14 @@ import { Lightbulb, Flame, Target, Trophy } from "lucide-react";
 import { useLearningPlanStore, useUIStore } from "@/stores";
 import { useIsMobile } from "@/hooks";
 import { Header, MobileNav } from "@/components/layout";
+import { PlanSwitcher, PlanSwitcherDesktop } from "@/components/layout";
 import { TechniqueCard, MasteryPath } from "@/components/technique";
 import { ReplaceModal, ReasoningModal, DecompositionModal } from "@/components/modals";
 import { CommitmentDial } from "@/components/commitment";
 import { OnboardingForm } from "@/components/onboarding";
 import { FocusedReader } from "@/components/reader";
 import { Button, Card, CardContent, CircularProgress } from "@/components/ui";
+import { Plus } from "lucide-react";
 import type { MasteryState } from "@/types";
 
 function LearningDashboard() {
@@ -72,6 +74,9 @@ function LearningDashboard() {
                 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                 
+                <div className="absolute top-4 right-4 hidden sm:block">
+                  <PlanSwitcherDesktop />
+                </div>
                 <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 sm:gap-4">
                   <div className="flex-1 min-w-0">
                     <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg leading-tight">
@@ -95,6 +100,7 @@ function LearningDashboard() {
               </div>
             </motion.div>
           )}
+
 
           {!plan.hobbyImageUrl && (
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
@@ -228,7 +234,7 @@ function LearningDashboard() {
           </div>
         </div>
       </main>
-
+      <PlanSwitcher />
       <MobileNav />
       <ReplaceModal />
       <ReasoningModal />

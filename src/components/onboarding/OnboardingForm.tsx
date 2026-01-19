@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ArrowRight, ArrowLeft, Zap } from "lucide-react";
 import { Button, Input, Textarea, Slider, Card, CardContent, ThinkingAnimation } from "@/components/ui";
@@ -10,6 +11,7 @@ import { formatDuration } from "@/lib/utils";
 type Step = "hobby" | "goal" | "time" | "generating" | "error";
 
 export function OnboardingForm() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>("hobby");
   const [hobby, setHobby] = useState("");
   const [goal, setGoal] = useState("");
@@ -73,18 +75,20 @@ export function OnboardingForm() {
 
   const handleHobbyChange = (value: string) => {
     setHobby(value);
-    if (value.trim().length >= 3 && !isLoadingQuotes) {
-      const timeoutId = setTimeout(() => {
-        fetchQuotesAndGradient(value);
-      }, 500);
-      return () => clearTimeout(timeoutId);
-    }
   };
 
   const handleNext = () => {
-    if (step === "hobby") setStep("goal");
-    else if (step === "goal") setStep("time");
-    else if (step === "time") handleGenerate();
+    if (step === "hobby") {
+      const value = hobby.trim();
+      if (value.length >= 3 && !isLoadingQuotes && quotes.length === 0) {
+        fetchQuotesAndGradient(value);
+      }
+      setStep("goal");
+    } else if (step === "goal") {
+      setStep("time");
+    } else if (step === "time") {
+      handleGenerate();
+    }
   };
 
   const handleBack = () => {
@@ -114,6 +118,7 @@ export function OnboardingForm() {
       setPlan(plan);
       setUIDailyMinutes(plan.dailyMinutes);
       setIsGenerating(false);
+      router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setIsGenerating(false);

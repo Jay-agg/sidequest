@@ -22,7 +22,6 @@ import {
 
 function SettingsContent() {
   const plan = useLearningPlanStore((state) => state.plan);
-  const clearPlan = useLearningPlanStore((state) => state.clearPlan);
   const pendingCount = useSyncStore((state) =>
     state.queue.filter((a) => !a.synced).length
   );
@@ -150,15 +149,15 @@ function SettingsContent() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <RotateCcw className="h-5 w-5 text-accent" />
-              Start a New Learning Plan
+              Add Another Hobby
             </DialogTitle>
             <DialogDescription>
-              This will clear your current progress for {plan?.hobby || "your hobby"} and let you choose a different hobby to learn. Your current plan will be lost.
+              Create another plan to learn in parallel. Your existing hobbies stay saved locally.
             </DialogDescription>
           </DialogHeader>
           <div className="p-4 bg-lavender/20 rounded-xl mb-4">
             <p className="text-sm text-foreground">
-              <span className="font-medium">Tip:</span> Export your current plan first if you want to save your progress.
+              <span className="font-medium">Tip:</span> You can switch between hobbies anytime from the header (desktop) or the plus button (mobile).
             </p>
           </div>
           <DialogFooter>
@@ -166,7 +165,7 @@ function SettingsContent() {
               Cancel
             </Button>
             <Button onClick={handleClearPlan} className="h-10 sm:h-11 px-4 sm:px-6 text-sm sm:text-base">
-              Start New Plan
+              Create New Hobby
             </Button>
           </DialogFooter>
         </DialogContent>

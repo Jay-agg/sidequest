@@ -4,15 +4,20 @@ import type { LearningPlan, Technique, MasteryState } from "@/types";
 import { generateId } from "@/lib/utils";
 
 interface LearningPlanState {
+  plans: LearningPlan[];
+  activePlanId: string | null;
   plan: LearningPlan | null;
   isGenerating: boolean;
   generationError: string | null;
   activeTechniqueId: string | null;
+  activeTechniqueByPlan: Record<string, string | null>;
 }
 
 interface LearningPlanActions {
   setPlan: (plan: LearningPlan) => void;
   clearPlan: () => void;
+  setActivePlan: (planId: string) => void;
+  deletePlan: (planId: string) => void;
   setIsGenerating: (isGenerating: boolean) => void;
   setGenerationError: (error: string | null) => void;
   setActiveTechnique: (techniqueId: string | null) => void;
@@ -48,20 +53,110 @@ type LearningPlanStore = LearningPlanState & LearningPlanActions;
 export const useLearningPlanStore = create<LearningPlanStore>()(
   persist(
     (set, get) => ({
+      plans: [],
+      activePlanId: null,
       plan: null,
       isGenerating: false,
       generationError: null,
       activeTechniqueId: null,
+      activeTechniqueByPlan: {},
 
-      setPlan: (plan) => set({ plan, generationError: null }),
+      setPlan: (incoming) => {
+        const state = get();
 
-      clearPlan: () => set({ plan: null, activeTechniqueId: null }),
+        const planToStore: LearningPlan = {
+          ...incoming,
+          id: incoming.id || generateId(),
+          createdAt: incoming.createdAt || Date.now(),
+          updatedAt: Date.now(),
+        };
+
+        const nextPlans = [planToStore, ...state.plans];
+        const nextActivePlanId = planToStore.id;
+        const nextActiveTechniqueByPlan = {
+          ...state.activeTechniqueByPlan,
+          [nextActivePlanId]: null,
+        };
+
+        set({
+          plans: nextPlans,
+          activePlanId: nextActivePlanId,
+          plan: planToStore,
+          activeTechniqueId: null,
+          activeTechniqueByPlan: nextActiveTechniqueByPlan,
+          generationError: null,
+        });
+      },
+
+      clearPlan: () => {
+        const state = get();
+        if (!state.activePlanId) {
+          set({ plan: null, activeTechniqueId: null });
+          return;
+        }
+
+        const remaining = state.plans.filter((p) => p.id !== state.activePlanId);
+        const nextActivePlanId = remaining[0]?.id ?? null;
+        const nextPlan = nextActivePlanId ? remaining.find((p) => p.id === nextActivePlanId) ?? null : null;
+        const nextActiveTechniqueByPlan = { ...state.activeTechniqueByPlan };
+        delete nextActiveTechniqueByPlan[state.activePlanId];
+        const nextActiveTechniqueId = nextActivePlanId ? nextActiveTechniqueByPlan[nextActivePlanId] ?? null : null;
+
+        set({
+          plans: remaining,
+          activePlanId: nextActivePlanId,
+          plan: nextPlan,
+          activeTechniqueId: nextActiveTechniqueId,
+          activeTechniqueByPlan: nextActiveTechniqueByPlan,
+        });
+      },
+
+      setActivePlan: (planId) => {
+        const state = get();
+        const nextPlan = state.plans.find((p) => p.id === planId) ?? null;
+        const nextActiveTechniqueId = state.activeTechniqueByPlan[planId] ?? null;
+        set({
+          activePlanId: planId,
+          plan: nextPlan,
+          activeTechniqueId: nextActiveTechniqueId,
+        });
+      },
+
+      deletePlan: (planId) => {
+        const state = get();
+        const remaining = state.plans.filter((p) => p.id !== planId);
+        const nextActivePlanId =
+          state.activePlanId === planId ? remaining[0]?.id ?? null : state.activePlanId;
+        const nextPlan = nextActivePlanId ? remaining.find((p) => p.id === nextActivePlanId) ?? null : null;
+        const nextActiveTechniqueByPlan = { ...state.activeTechniqueByPlan };
+        delete nextActiveTechniqueByPlan[planId];
+        const nextActiveTechniqueId = nextActivePlanId ? nextActiveTechniqueByPlan[nextActivePlanId] ?? null : null;
+
+        set({
+          plans: remaining,
+          activePlanId: nextActivePlanId,
+          plan: nextPlan,
+          activeTechniqueId: nextActiveTechniqueId,
+          activeTechniqueByPlan: nextActiveTechniqueByPlan,
+        });
+      },
 
       setIsGenerating: (isGenerating) => set({ isGenerating }),
 
       setGenerationError: (error) => set({ generationError: error }),
 
-      setActiveTechnique: (techniqueId) => set({ activeTechniqueId: techniqueId }),
+      setActiveTechnique: (techniqueId) => {
+        const state = get();
+        const planId = state.activePlanId;
+        if (!planId) {
+          set({ activeTechniqueId: techniqueId });
+          return;
+        }
+        set({
+          activeTechniqueId: techniqueId,
+          activeTechniqueByPlan: { ...state.activeTechniqueByPlan, [planId]: techniqueId },
+        });
+      },
 
       updateTechniqueMastery: (techniqueId, masteryState) => {
         const { plan } = get();
@@ -101,6 +196,17 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
             lastPracticeDate: newLastDate,
             updatedAt: Date.now(),
           },
+          plans: get().plans.map((p) =>
+            p.id === plan.id
+              ? {
+                  ...plan,
+                  techniques: updatedTechniques,
+                  streakDays: newStreak,
+                  lastPracticeDate: newLastDate,
+                  updatedAt: Date.now(),
+                }
+              : p
+          ),
         });
       },
 
@@ -127,6 +233,15 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
             techniques: updatedTechniques,
             updatedAt: Date.now(),
           },
+          plans: get().plans.map((p) =>
+            p.id === plan.id
+              ? {
+                  ...plan,
+                  techniques: updatedTechniques,
+                  updatedAt: Date.now(),
+                }
+              : p
+          ),
         });
       },
 
@@ -146,6 +261,15 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
             techniques: updatedTechniques,
             updatedAt: Date.now(),
           },
+          plans: get().plans.map((p) =>
+            p.id === plan.id
+              ? {
+                  ...plan,
+                  techniques: updatedTechniques,
+                  updatedAt: Date.now(),
+                }
+              : p
+          ),
         });
       },
 
@@ -192,6 +316,18 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
             techniques: updatedTechniques,
             updatedAt: Date.now(),
           },
+          plans: get().plans.map((p) =>
+            p.id === plan.id
+              ? {
+                  ...plan,
+                  techniques: updatedTechniques,
+                  updatedAt: Date.now(),
+                }
+              : p
+          ),
+          activeTechniqueByPlan: plan.id
+            ? { ...get().activeTechniqueByPlan, [plan.id]: newActiveTechniqueId }
+            : get().activeTechniqueByPlan,
         });
       },
 
@@ -205,6 +341,15 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
             dailyMinutes: minutes,
             updatedAt: Date.now(),
           },
+          plans: get().plans.map((p) =>
+            p.id === plan.id
+              ? {
+                  ...plan,
+                  dailyMinutes: minutes,
+                  updatedAt: Date.now(),
+                }
+              : p
+          ),
         });
       },
 
@@ -246,6 +391,15 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
               id: plan.id,
               createdAt: plan.createdAt,
             },
+            plans: get().plans.map((p) =>
+              p.id === plan.id
+                ? {
+                    ...regeneratedPlan,
+                    id: plan.id,
+                    createdAt: plan.createdAt,
+                  }
+                : p
+            ),
             isGenerating: false,
             generationError: null,
             activeTechniqueId: null,
@@ -302,6 +456,17 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
             lastPracticeDate: newLastDate,
             updatedAt: Date.now(),
           },
+          plans: get().plans.map((p) =>
+            p.id === plan.id
+              ? {
+                  ...plan,
+                  techniques: updatedTechniques,
+                  streakDays: newStreak,
+                  lastPracticeDate: newLastDate,
+                  updatedAt: Date.now(),
+                }
+              : p
+          ),
         });
       },
 
@@ -344,6 +509,18 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
             lastPracticeDate: today,
             updatedAt: Date.now(),
           },
+          plans: get().plans.map((p) =>
+            p.id === plan.id
+              ? {
+                  ...plan,
+                  techniques: updatedTechniques,
+                  totalPracticeMinutes: (plan.totalPracticeMinutes || 0) + minutes,
+                  streakDays: newStreak,
+                  lastPracticeDate: today,
+                  updatedAt: Date.now(),
+                }
+              : p
+          ),
         });
       },
 
@@ -396,7 +573,53 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
     {
       name: "sidequest-learning-plan",
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ plan: state.plan, activeTechniqueId: state.activeTechniqueId }),
+      version: 2,
+      migrate: (persisted: any) => {
+        if (!persisted) return persisted;
+        if (persisted?.plans) return persisted;
+        const legacyPlan = persisted?.plan ?? null;
+        if (!legacyPlan) {
+          return {
+            ...persisted,
+            plans: [],
+            activePlanId: null,
+            plan: null,
+            activeTechniqueByPlan: {},
+          };
+        }
+        const planId = legacyPlan.id || generateId();
+        const migratedPlan = {
+          ...legacyPlan,
+          id: planId,
+          createdAt: legacyPlan.createdAt || Date.now(),
+          updatedAt: Date.now(),
+        };
+        return {
+          ...persisted,
+          plans: [migratedPlan],
+          activePlanId: planId,
+          plan: migratedPlan,
+          activeTechniqueByPlan: { [planId]: persisted.activeTechniqueId ?? null },
+        };
+      },
+      partialize: (state) => ({
+        plans: state.plans,
+        activePlanId: state.activePlanId,
+        activeTechniqueByPlan: state.activeTechniqueByPlan,
+      }),
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        if (state.activePlanId && state.plans.length > 0) {
+          const activePlan = state.plans.find((p) => p.id === state.activePlanId);
+          if (activePlan && !state.plan) {
+            state.plan = activePlan;
+            state.activeTechniqueId = state.activeTechniqueByPlan[state.activePlanId] ?? null;
+          }
+        } else if (!state.activePlanId) {
+          state.plan = null;
+          state.activeTechniqueId = null;
+        }
+      },
     }
   )
 );
