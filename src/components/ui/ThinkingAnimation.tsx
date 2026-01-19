@@ -16,12 +16,12 @@ export function ThinkingAnimation() {
   }, []);
 
   if (!animationData) {
-    return <div className="w-48 h-48 mx-auto" />;
+    return <div className="w-full h-full flex items-center justify-center" />;
   }
 
   return (
-    <div className="w-48 h-48 mx-auto">
-      <Lottie animationData={animationData} loop={true} />
+    <div className="w-full h-full flex items-center justify-center overflow-hidden">
+      <Lottie animationData={animationData} loop={true} className="w-full h-full" />
     </div>
   );
 }

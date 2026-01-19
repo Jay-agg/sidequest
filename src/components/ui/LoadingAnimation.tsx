@@ -24,8 +24,8 @@ export function LoadingAnimation({ className = "w-48 h-48 mx-auto" }: LoadingAni
   }
 
   return (
-    <div className={className}>
-      <Lottie animationData={animationData} loop={true} />
+    <div className={`${className} flex items-center justify-center`}>
+      <Lottie animationData={animationData} loop={true} className="w-full h-full" />
     </div>
   );
 }

@@ -167,8 +167,10 @@ export function CommitmentDial() {
                 </DialogDescription>
               </DialogHeader>
               
-              <div className="my-6">
-                <LoadingAnimation className="w-64 h-64 mx-auto" />
+              <div className="flex flex-col items-center justify-center py-4 sm:py-6">
+                <div className="w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center mb-4 sm:mb-6">
+                  <LoadingAnimation className="w-full h-full" />
+                </div>
               </div>
 
               <div className="text-center">

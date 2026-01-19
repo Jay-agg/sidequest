@@ -207,7 +207,7 @@ export function OnboardingForm() {
                   transition={{ duration: 0.5 }}
                   className="flex flex-col items-center justify-center text-center py-8 sm:py-12 min-h-[400px] sm:min-h-[500px]"
                 >
-                  <div className="w-32 h-32 sm:w-48 sm:h-48 mx-auto mb-6 sm:mb-8 flex-shrink-0">
+                  <div className="w-32 h-32 sm:w-48 sm:h-48 mx-auto mb-6 sm:mb-8 flex-shrink-0 flex items-center justify-center">
                     <ThinkingAnimation />
                   </div>
                   <motion.h2
@@ -227,7 +227,7 @@ export function OnboardingForm() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.5 }}
-                        className="px-4 sm:px-6 max-w-2xl"
+                        className="px-4 sm:px-6 max-w-2xl mt-0"
                       >
                         <p className="text-base sm:text-lg text-foreground-muted italic">
                           "{quotes[currentQuoteIndex]}"
@@ -237,7 +237,7 @@ export function OnboardingForm() {
                   </AnimatePresence>
 
                   {quotes.length === 0 && (
-                    <p className="text-sm sm:text-base text-foreground-muted px-4 max-w-2xl">
+                    <p className="text-sm sm:text-base text-foreground-muted px-4 max-w-2xl mt-0">
                       Selecting the most impactful techniques for {hobby}...
                     </p>
                   )}

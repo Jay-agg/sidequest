@@ -157,9 +157,7 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
         if (parentIndex === -1) return;
 
         const parentTechnique = plan.techniques[parentIndex];
-        const insertPosition = parentIndex + 1;
-
-        const newTechniques = subTechniques.map((subTech, index) => ({
+        const newTechniques = subTechniques.map((subTech) => ({
           id: generateId(),
           name: subTech.name,
           description: subTech.description,
@@ -168,23 +166,27 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
           depthLevel: parentTechnique.depthLevel,
           masteryState: "unstarted" as const,
           resources: [],
-          prerequisites: index === 0 ? [parentTechniqueId] : [subTechniques[index - 1].name],
-          order: parentTechnique.order + 0.1 + (index * 0.01),
+          prerequisites: [],
+          order: 0,
           youtubeQuery: subTech.youtubeQuery,
           quizQuestions: subTech.quizQuestions || [],
           practiceResource: subTech.practiceResource,
         }));
 
-        const updatedTechniques = [
-          ...plan.techniques.slice(0, insertPosition),
+        const replaced = [
+          ...plan.techniques.slice(0, parentIndex),
           ...newTechniques,
-          ...plan.techniques.slice(insertPosition),
-        ].map((tech, idx) => ({
-          ...tech,
-          order: idx,
-        }));
+          ...plan.techniques.slice(parentIndex + 1),
+        ];
+
+        const updatedTechniques = replaced.map((tech, idx) => ({ ...tech, order: idx }));
+
+        const currentActive = get().activeTechniqueId;
+        const newActiveTechniqueId =
+          currentActive === parentTechniqueId ? newTechniques[0]?.id ?? null : currentActive;
 
         set({
+          activeTechniqueId: newActiveTechniqueId,
           plan: {
             ...plan,
             techniques: updatedTechniques,
@@ -382,15 +384,12 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
         const technique = plan.techniques.find((t) => t.id === techniqueId);
         if (!technique) return true;
 
-        // First technique is always unlocked
         if (technique.order === 0) return false;
 
-        // Find the previous technique
         const previousTechnique = plan.techniques.find(
           (t) => t.order === technique.order - 1
         );
 
-        // Technique is locked if previous technique is not mastered
         return previousTechnique?.masteryState !== "mastered";
       },
     }),
