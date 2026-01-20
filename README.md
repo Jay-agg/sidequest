@@ -1,6 +1,6 @@
-# Learn8
+# SideQuest
 
-Learn8 is a calm, local-first learning companion that helps you pick a hobby and focus on *just the few techniques that matter most* (usually 5–8). Instead of sending you down endless rabbit holes, it nudges you toward practice, progress, and mastery.
+SideQuest is a calm, local-first learning companion that helps you pick a hobby and focus on *just the few techniques that matter most* (usually 5–8). Instead of sending you down endless rabbit holes, it nudges you toward practice, progress, and mastery.
 
 
 ## UI Video Demo
