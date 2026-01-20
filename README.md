@@ -5,8 +5,6 @@ Learn8 is a calm, local-first learning companion that helps you pick a hobby and
 
 ## UI Video Demo
 
-Add a link to a short screen recording of the UI here:
-
 [Watch the UI demo](https://youtu.be/9qrtgTYt3Rc)
 
 ## What it does 
