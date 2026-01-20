@@ -22,6 +22,7 @@ interface LearningPlanState {
   plans: LearningPlan[];
   activePlanId: string | null;
   plan: LearningPlan | null;
+  hasHydrated: boolean;
   isGenerating: boolean;
   generationError: string | null;
   activeTechniqueId: string | null;
@@ -71,6 +72,7 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
       plans: [],
       activePlanId: null,
       plan: null,
+      hasHydrated: false,
       isGenerating: false,
       generationError: null,
       activeTechniqueId: null,
@@ -634,24 +636,38 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
         activePlanId: state.activePlanId,
         activeTechniqueByPlan: state.activeTechniqueByPlan,
       }),
-      onRehydrateStorage: () => (state) => {
-        if (!state) return;
-        if (state.activePlanId && state.plans.length > 0) {
-          const activePlan = state.plans.find((p) => p.id === state.activePlanId);
-          if (activePlan && !state.plan) {
-            state.plan = activePlan;
-            state.activeTechniqueId = state.activeTechniqueByPlan[state.activePlanId] ?? null;
-          }
-        } else if (!state.activePlanId) {
-          state.plan = null;
-          state.activeTechniqueId = null;
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          useLearningPlanStore.setState({ hasHydrated: true });
+          return;
         }
+        if (!state) return;
+
+        if (state.activePlanId && state.plans.length > 0) {
+          const activePlan = state.plans.find((p) => p.id === state.activePlanId) ?? null;
+          const activeTechniqueId = activePlan
+            ? state.activeTechniqueByPlan[state.activePlanId] ?? null
+            : null;
+          useLearningPlanStore.setState({
+            hasHydrated: true,
+            plan: activePlan,
+            activeTechniqueId,
+          });
+          return;
+        }
+
+        useLearningPlanStore.setState({
+          hasHydrated: true,
+          plan: null,
+          activeTechniqueId: null,
+        });
       },
     }
   )
 );
 
 export const selectPlan = (state: LearningPlanStore) => state.plan;
+export const selectHasHydrated = (state: LearningPlanStore) => state.hasHydrated;
 export const selectIsGenerating = (state: LearningPlanStore) => state.isGenerating;
 export const selectTechniques = (state: LearningPlanStore) =>
   state.plan?.techniques ?? [];

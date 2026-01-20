@@ -14,6 +14,7 @@ import type { MasteryState } from "@/types";
 
 function ProgressContent() {
   const plan = useLearningPlanStore((state) => state.plan);
+  const hasHydrated = useLearningPlanStore((state) => state.hasHydrated);
   
   const progress = useMemo(() => {
     if (!plan) return { completed: 0, total: 0, percentage: 0 };
@@ -70,6 +71,14 @@ function ProgressContent() {
       }, 500);
     }
   }, [plan, progress.completed, progress.total]);
+
+  if (!hasHydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-sm text-foreground-muted">Loading…</div>
+      </div>
+    );
+  }
 
   if (!plan) return <OnboardingForm />;
 
@@ -275,10 +284,10 @@ function StatCardWrapper({ children, index }: { children: React.ReactNode; index
   const isMobile = useIsMobile()
 
   const gridColors = [
-    "rgb(139, 127, 212)", // accent/purple for Techniques Mastered
-    "rgb(255, 203, 184)", // peach/orange for Total Techniques
-    "rgb(168, 216, 255)", // sky/blue for Time Invested
-    "rgb(168, 235, 207)", // mint/green for Daily Goal
+    "rgb(139, 127, 212)", // Techniques Mastered
+    "rgb(255, 203, 184)", // Total Techniques
+    "rgb(168, 216, 255)", //Time Invested
+    "rgb(168, 235, 207)", // Daily Goal
   ]
 
   return (

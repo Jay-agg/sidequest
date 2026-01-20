@@ -40,12 +40,12 @@ export function PlanSwitcherDesktop() {
     <>
       <button
         type="button"
-        className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all active:scale-95"
+        className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 backdrop-blur-md border-2 border-black text-white hover:bg-black/80 transition-all active:scale-95"
         onClick={() => setOpen(true)}
         aria-label="Manage hobbies"
       >
         <Plus className="w-4 h-4" />
-        <span className="text-sm font-medium">{activePlan?.hobby ?? "Add hobby"}</span>
+        <span className="text-sm font-medium">Manage hobbies</span>
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>

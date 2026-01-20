@@ -45,9 +45,11 @@ const CircularProgress = ({
   className?: string;
   animate?: boolean;
 }) => {
+  const normalized = Math.max(0, Math.min(100, value));
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
-  const offset = circumference - (value / 100) * circumference;
+  const offset = circumference - (normalized / 100) * circumference;
+  const showProgress = normalized > 0;
 
   const fontSize = size < 60 ? "text-xs" : size < 100 ? "text-sm" : "text-lg";
 
@@ -76,39 +78,43 @@ const CircularProgress = ({
           cx={size / 2}
           cy={size / 2}
         />
-        <circle
-          className="transition-all duration-1000 ease-out"
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          strokeDashoffset={animate ? circumference : offset}
-          strokeLinecap="round"
-          stroke="url(#progressGradient)"
-          fill="transparent"
-          r={radius}
-          cx={size / 2}
-          cy={size / 2}
-          filter="url(#glow)"
-          style={{
-            animation: animate ? `drawCircle 1.5s ease-out forwards` : 'none',
-            strokeDashoffset: offset,
-          }}
-        />
+        {showProgress && (
+          <circle
+            className="transition-all duration-1000 ease-out"
+            strokeWidth={strokeWidth}
+            strokeDasharray={circumference}
+            strokeDashoffset={animate ? circumference : offset}
+            strokeLinecap="round"
+            stroke="url(#progressGradient)"
+            fill="transparent"
+            r={radius}
+            cx={size / 2}
+            cy={size / 2}
+            filter="url(#glow)"
+            style={{
+              animation: animate ? `drawCircle 1.5s ease-out forwards` : "none",
+              strokeDashoffset: offset,
+            }}
+          />
+        )}
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
         <span className={cn("font-semibold text-foreground tabular-nums", fontSize)}>
-          {value}%
+          {normalized}%
         </span>
       </div>
-      <style jsx>{`
-        @keyframes drawCircle {
-          from {
-            stroke-dashoffset: ${circumference};
+      {showProgress && animate && (
+        <style jsx>{`
+          @keyframes drawCircle {
+            from {
+              stroke-dashoffset: ${circumference};
+            }
+            to {
+              stroke-dashoffset: ${offset};
+            }
           }
-          to {
-            stroke-dashoffset: ${offset};
-          }
-        }
-      `}</style>
+        `}</style>
+      )}
     </div>
   );
 };

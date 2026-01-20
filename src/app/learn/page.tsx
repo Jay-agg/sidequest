@@ -55,6 +55,7 @@ const defaultQuizQuestions: QuizQuestion[] = [
 export default function LearnPage() {
   const router = useRouter();
   const plan = useLearningPlanStore((state) => state.plan);
+  const hasHydrated = useLearningPlanStore((state) => state.hasHydrated);
   const activeTechniqueId = useLearningPlanStore((state) => state.activeTechniqueId);
   const setActiveTechnique = useLearningPlanStore((state) => state.setActiveTechnique);
   const updateTechniqueMastery = useLearningPlanStore((state) => state.updateTechniqueMastery);
@@ -76,10 +77,10 @@ export default function LearnPage() {
   }, [plan, activeTechniqueId]);
 
   useEffect(() => {
-    if (!plan) {
+    if (hasHydrated && !plan) {
       router.push("/");
     }
-  }, [plan, router]);
+  }, [hasHydrated, plan, router]);
 
   useEffect(() => {
     if (technique && isTechniqueLocked(technique.id)) {

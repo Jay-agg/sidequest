@@ -143,6 +143,7 @@ function LearningDashboard() {
                   <div className="flex-1 min-w-0">
                     <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg leading-tight">
                       <TypingAnimation
+                        key={`hero-title-${plan.id}`}
                         children={`Your ${plan.hobby} Journey`}
                         className="text-white leading-tight"
                         delay={0.3}
@@ -153,6 +154,7 @@ function LearningDashboard() {
                     </h1>
                     <p className="text-white/90 text-xs sm:text-sm md:text-base drop-shadow-md">
                       <TypingAnimation
+                        key={`hero-count-${plan.id}`}
                         children={`${plan.techniques.length} techniques to master`}
                         className="text-white/90"
                         delay={0.8}
@@ -183,6 +185,7 @@ function LearningDashboard() {
               <div>
                 <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-1">
                   <TypingAnimation
+                    key={`hero-title-fallback-${plan.id}`}
                     children={`Your ${plan.hobby} Journey`}
                     delay={0.3}
                     duration={50}
@@ -192,6 +195,7 @@ function LearningDashboard() {
                 </h1>
                 <p className="text-sm sm:text-base text-foreground-muted">
                   <TypingAnimation
+                    key={`hero-count-fallback-${plan.id}`}
                     children={`${plan.techniques.length} techniques to master`}
                     delay={0.8}
                     duration={30}
@@ -345,6 +349,7 @@ function LearningDashboard() {
 
 export default function HomePage() {
   const plan = useLearningPlanStore((state) => state.plan);
+  const hasHydrated = useLearningPlanStore((state) => state.hasHydrated);
   const isMobile = useIsMobile();
   const setIsMobile = useUIStore((state) => state.setIsMobile);
   const showTransition = useUIStore((state) => state.showTransition);
@@ -353,6 +358,14 @@ export default function HomePage() {
   useEffect(() => {
     setIsMobile(isMobile);
   }, [isMobile, setIsMobile]);
+
+  if (!hasHydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-sm text-foreground-muted">Loading…</div>
+      </div>
+    );
+  }
 
   if (!plan) {
     return <OnboardingForm />;
