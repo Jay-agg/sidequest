@@ -1,185 +1,104 @@
 # Learn8
 
-Learn8 helps users learn a hobby by mastering only the most impactful 5-8 techniques, intentionally avoiding information overload.
+Learn8 is a calm, local-first learning companion that helps you pick a hobby and focus on *just the few techniques that matter most* (usually 5–8). Instead of sending you down endless rabbit holes, it nudges you toward practice, progress, and mastery.
 
-## Core Principles
 
-- **Replace, don't add** - users cannot grow the plan arbitrarily
-- **Mastery over consumption** - focus on doing, not just watching
-- **AI must be explainable** - see why each technique was chosen
-- **Calm, friendly UI** - non-overwhelming experience
+## UI Video Demo
 
-## Tech Stack
+Add a link to a short screen recording of the UI here:
 
-- **Framework**: Next.js 16 (App Router)
+[Watch the UI demo](https://youtu.be/9qrtgTYt3Rc)
+
+## What it does 
+
+- **Creates a focused learning plan** for your hobby and goal (powered by AI).
+- **Keeps the plan intentionally small** so you don’t accumulate an overwhelming list.
+- **Helps you practice and track mastery**, not just consume content.
+- **Stays local-first**: your progress is stored in the browser (IndexedDB), so it feels fast and works well even with spotty connectivity.
+
+
+## Main features
+
+- **AI-generated “5–8 technique” plan**
+  You provide a hobby, a goal, and how many minutes you can practice per day. Learn8 generates a short plan designed to fit that commitment.
+
+- **Explainable selection (no mystery plans)**
+  The app aims to show *why* each technique made the cut, so it feels like a plan you can trust and follow.
+
+- **Replace-not-add workflow**
+  If something doesn’t fit, you replace or refine items instead of piling on more.
+
+- **Anti-rabbit-hole reader mode**
+  Encourages short, intentional learning sessions with gentle nudges to stop when you’ve gotten what you need.
+
+- **Mastery tracking**
+  Techniques move through a clear progression (from starting out to mastered) so you always know what to practice next.
+
+- **Optional video enrichment**
+  Techniques can be enriched with a couple focused YouTube resources (if a YouTube API key is configured).
+
+
+## Tech overview 
+
+- **Framework**: Next.js (App Router)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS v4
-- **Components**: Radix UI primitives, custom components
-- **Animations**: Framer Motion
+- **UI**: Tailwind CSS + Radix primitives
 - **State**: Zustand
-- **Mobile**: Vaul (bottom sheets)
-- **AI**: OpenAI SDK with structured outputs (Zod)
-- **Storage**: IndexedDB (idb-keyval) for local-first architecture
+- **AI**: OpenAI SDK with Zod-validated structured outputs
+- **Storage**: IndexedDB (via `idb-keyval`)
 
-## Getting Started
+
+## Project setup
 
 ### Prerequisites
 
-- Node.js 20.19+ or 22.12+
-- npm 10+
+- **Node.js**: 20.19+ or 22.12+
+- **npm**: 10+
 
-### Installation
+### 1) Install dependencies
 
 ```bash
 npm install
 ```
 
-### Development
+### 2) Configure environment variables
+
+Create a file named `.env.local` in the project root:
+
+```bash
+OPENAI_API_KEY=your_openai_key_here
+# Optional (enables YouTube video enrichment)
+YOUTUBE_API_KEY=your_youtube_key_here
+```
+
+Notes:
+- The app **requires** `OPENAI_API_KEY` to generate plans.
+- If `YOUTUBE_API_KEY` is not set, the app should still work, but video resources may be missing.
+
+### 3) Run the dev server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Then open:
 
-### Environment Variables
+- `http://localhost:3000`
 
-Create a `.env.local` file:
 
-```
-OPENAI_API_KEY=your-api-key-here
-```
+## Common scripts
 
-## Architecture
+- **Development**: `npm run dev`
+- **Production build**: `npm run build`
+- **Start production server**: `npm run start`
 
-### Core Domains
+## Where the important stuff lives
 
-```
-src/
-  types/          - Zod schemas and TypeScript types
-  stores/         - Zustand stores (learningPlan, sync, ui)
-  lib/
-    llm/          - LLM pipeline (architect, filter, researcher)
-    sync/         - Local-first sync engine
-    utils.ts      - Utility functions
-  components/
-    ui/           - Base UI components
-    layout/       - Header, navigation
-    technique/    - Technique cards, mastery path
-    modals/       - Replace, reasoning, decomposition
-    commitment/   - Daily time commitment dial
-    onboarding/   - Plan creation flow
-    reader/       - Anti-rabbit-hole focused reader
-  hooks/          - Custom React hooks
-  app/            - Next.js App Router pages
-```
+If you’re new to the codebase, these are good starting points:
 
-### LLM Pipeline
+- `src/app/` — Routes and pages (Next.js App Router)
+- `src/app/api/` — API routes (plan generation lives here)
+- `src/lib/llm/` — The multi-stage LLM pipeline
+- `src/stores/` — Zustand stores for plans and UI state
 
-The LLM usage follows a multi-stage pipeline:
 
-1. **Architect Stage** - Generate ~20 possible techniques for a hobby
-2. **Filter Stage** - Select the best 5-8 techniques based on time/goal constraints
-3. **Researcher Stage** - Attach 1-2 focused resources per technique
-
-All outputs are validated with Zod schemas.
-
-### State Management
-
-Uses Zustand with small, focused stores:
-
-- `learningPlanStore` - Current learning plan and techniques
-- `syncStore` - Offline action queue
-- `uiStore` - UI state (modals, reader, preferences)
-
-### Local-First Architecture
-
-- All user actions are optimistic (UI updates immediately)
-- Actions are queued for sync when offline
-- Uses IndexedDB via idb-keyval for persistence
-
-## Performance Decisions
-
-- Dynamic imports for heavy components (LLM UI, SVG visualizations)
-- Lazy-loading of Framer Motion animations
-- Minimal bundle size with tree-shaking
-- CSS-first animations where possible
-
-## Testing
-
-### Unit Tests
-
-```bash
-npm test
-```
-
-### E2E Tests
-
-```bash
-npm run test:e2e
-```
-
-Tests include:
-- Mobile bottom-sheet replace flow
-- Learning plan state machine
-
-## Features
-
-### Interactive Mastery Path
-
-SVG-based visualization of learning progress with:
-- Desktop: zig-zag/constellation layout
-- Mobile: vertical stepper
-
-### Atomic Mastery Tracking
-
-Four states per technique:
-- Unstarted
-- Learning
-- Practicing
-- Mastered
-
-### Replace-Not-Add Flow
-
-Users can only replace or decompose techniques, never add more:
-- Desktop: Modal/side panel
-- Mobile: Bottom sheet
-
-### Anti-Rabbit-Hole Mode
-
-Focused reader view with:
-- Session time tracking
-- "I've learned enough" CTA
-- Gentle warnings for long sessions
-
-### Commitment Dial
-
-Adjustable 10-60 min/day slider that adapts technique depth:
-- Basic (10-20 min)
-- Intermediate (20-40 min)
-- Deep (40-60 min)
-
-## Design System
-
-### Colors
-
-Soft pastel palette:
-- Lavender: #E6E0F8
-- Peach: #FFE5D9
-- Mint: #D4F5E9
-- Sky: #D6EEFF
-- Warm Yellow: #FFF4CC
-- Accent: #8B7FD4
-
-### Typography
-
-- Display: Nunito (headings)
-- Body: DM Sans
-
-### Components
-
-Rounded corners (12-20px), soft shadows, subtle gradients.
-
-## License
-
-MIT
