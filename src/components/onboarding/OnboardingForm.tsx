@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ArrowRight, ArrowLeft, Zap } from "lucide-react";
@@ -19,6 +19,8 @@ export function OnboardingForm() {
   const [error, setError] = useState<string | null>(null);
   const [quotes, setQuotes] = useState<string[]>([]);
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+  const [generationProgress, setGenerationProgress] = useState(0);
+  const generationTargetRef = useRef(88);
   const [gradient, setGradient] = useState<{ colors: string[]; animation: string }>({
     colors: ["#6366f1", "#8b5cf6", "#d946ef"],
     animation: "smooth",
@@ -39,6 +41,39 @@ export function OnboardingForm() {
       return () => clearInterval(interval);
     }
   }, [step, quotes.length]);
+
+  useEffect(() => {
+    if (step !== "generating") return;
+
+    setGenerationProgress(3);
+    generationTargetRef.current = 90;
+
+    let raf: number | null = null;
+    let lastTime = performance.now();
+
+    const tick = () => {
+      const now = performance.now();
+      const delta = now - lastTime;
+      lastTime = now;
+
+      setGenerationProgress((p) => {
+        const target = generationTargetRef.current;
+        if (p >= target) return p;
+        const deltaSeconds = delta / 1000;
+        const ratePerSecond = 2.4; // ~2.4% per second to reach ~90% in ~37s
+        const increment = ratePerSecond * deltaSeconds;
+        return Math.min(target, p + increment);
+      });
+
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [step]);
 
   const fetchQuotesAndGradient = useCallback(async (hobbyValue: string) => {
     if (!hobbyValue.trim() || isLoadingQuotes) return;
@@ -103,6 +138,8 @@ export function OnboardingForm() {
     setStep("generating");
     setIsGenerating(true);
     setError(null);
+    setGenerationProgress(3);
+    generationTargetRef.current = 90;
 
     try {
       const response = await fetch("/api/generate-plan", {
@@ -120,6 +157,11 @@ export function OnboardingForm() {
       setPlan(plan);
       setUIDailyMinutes(plan.dailyMinutes);
       setIsGenerating(false);
+
+      generationTargetRef.current = 100;
+      setGenerationProgress((p) => (p < 98 ? 98 : p));
+      await new Promise((r) => setTimeout(r, 500));
+
       if (isMobile) {
         setShowTransition(true);
         setTimeout(() => {
@@ -242,7 +284,7 @@ export function OnboardingForm() {
                   >
                     Creating your learning path
                   </motion.h2>
-                  
+
                   <AnimatePresence mode="wait">
                     {quotes.length > 0 && (
                       <motion.div
@@ -259,6 +301,21 @@ export function OnboardingForm() {
                       </motion.div>
                     )}
                   </AnimatePresence>
+
+                  <div className="w-full max-w-sm sm:max-w-md px-4 sm:px-6 mt-8 sm:mt-10">
+                    <div className="h-1.5 sm:h-2 w-full rounded-full bg-foreground/10 overflow-hidden border border-card-border/60">
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{
+                          backgroundColor: "rgb(255, 140, 90)",
+                          boxShadow: "0 0 18px rgba(255, 140, 90, 0.35)",
+                        }}
+                        initial={{ width: "0%" }}
+                        animate={{ width: `${generationProgress}%` }}
+                        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                      />
+                    </div>
+                  </div>
 
                   {quotes.length === 0 && (
                     <p className="text-sm sm:text-base text-foreground-muted px-4 max-w-2xl mt-0">

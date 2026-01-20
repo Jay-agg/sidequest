@@ -9,7 +9,7 @@ import { useIsMobile, useScrollAnimation } from "@/hooks";
 import { Header, MobileNav, PlanSwitcher } from "@/components/layout";
 import { Card, CardContent, CircularProgress, FlickeringGrid } from "@/components/ui";
 import { OnboardingForm } from "@/components/onboarding";
-import { formatDuration } from "@/lib/utils";
+import { cn, formatDuration } from "@/lib/utils";
 import type { MasteryState } from "@/types";
 
 function ProgressContent() {
@@ -98,59 +98,51 @@ function ProgressContent() {
 
         <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-2 lg:grid-cols-4 mb-4 sm:mb-8">
           <StatCardWrapper index={0}>
-            <Card className="h-full">
-              <CardContent className="p-3 sm:p-6 flex flex-col items-center text-center">
-                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-accent/10 flex items-center justify-center mb-2 sm:mb-4">
-                  <Trophy className="h-4 w-4 sm:h-6 sm:w-6 text-accent" />
-                </div>
-                <p className="text-xl sm:text-3xl font-display font-bold text-foreground">
-                  {progress.completed}
-                </p>
-                <p className="text-xs sm:text-sm text-foreground-muted">Techniques Mastered</p>
-              </CardContent>
-            </Card>
+            <CardContent className="p-3 sm:p-6 flex flex-col items-center text-center">
+              <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-accent/10 flex items-center justify-center mb-2 sm:mb-4">
+                <Trophy className="h-4 w-4 sm:h-6 sm:w-6 text-accent" />
+              </div>
+              <p className="text-xl sm:text-3xl font-display font-bold text-foreground">
+                {progress.completed}
+              </p>
+              <p className="text-xs sm:text-sm text-foreground-muted">Techniques Mastered</p>
+            </CardContent>
           </StatCardWrapper>
 
           <StatCardWrapper index={1}>
-            <Card className="h-full">
-              <CardContent className="p-3 sm:p-6 flex flex-col items-center text-center">
-                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-peach/50 flex items-center justify-center mb-2 sm:mb-4">
-                  <Target className="h-4 w-4 sm:h-6 sm:w-6 text-peach-dark" />
-                </div>
-                <p className="text-xl sm:text-3xl font-display font-bold text-foreground">
-                  {progress.total}
-                </p>
-                <p className="text-xs sm:text-sm text-foreground-muted">Total Techniques</p>
-              </CardContent>
-            </Card>
+            <CardContent className="p-3 sm:p-6 flex flex-col items-center text-center">
+              <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-peach/50 flex items-center justify-center mb-2 sm:mb-4">
+                <Target className="h-4 w-4 sm:h-6 sm:w-6 text-peach-dark" />
+              </div>
+              <p className="text-xl sm:text-3xl font-display font-bold text-foreground">
+                {progress.total}
+              </p>
+              <p className="text-xs sm:text-sm text-foreground-muted">Total Techniques</p>
+            </CardContent>
           </StatCardWrapper>
 
           <StatCardWrapper index={2}>
-            <Card className="h-full">
-              <CardContent className="p-3 sm:p-6 flex flex-col items-center text-center">
-                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-sky/50 flex items-center justify-center mb-2 sm:mb-4">
-                  <Clock className="h-4 w-4 sm:h-6 sm:w-6 text-sky-dark" />
-                </div>
-                <p className="text-xl sm:text-3xl font-display font-bold text-foreground">
-                  {formatDuration(completedMinutes)}
-                </p>
-                <p className="text-xs sm:text-sm text-foreground-muted">Time Invested</p>
-              </CardContent>
-            </Card>
+            <CardContent className="p-3 sm:p-6 flex flex-col items-center text-center">
+              <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-sky/50 flex items-center justify-center mb-2 sm:mb-4">
+                <Clock className="h-4 w-4 sm:h-6 sm:w-6 text-sky-dark" />
+              </div>
+              <p className="text-xl sm:text-3xl font-display font-bold text-foreground">
+                {formatDuration(completedMinutes)}
+              </p>
+              <p className="text-xs sm:text-sm text-foreground-muted">Time Invested</p>
+            </CardContent>
           </StatCardWrapper>
 
           <StatCardWrapper index={3}>
-            <Card className="h-full">
-              <CardContent className="p-3 sm:p-6 flex flex-col items-center text-center">
-                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-mint/50 flex items-center justify-center mb-2 sm:mb-4">
-                  <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-mint-dark" />
-                </div>
-                <p className="text-xl sm:text-3xl font-display font-bold text-foreground">
-                  {formatDuration(plan.dailyMinutes)}
-                </p>
-                <p className="text-xs sm:text-sm text-foreground-muted">Daily Goal</p>
-              </CardContent>
-            </Card>
+            <CardContent className="p-3 sm:p-6 flex flex-col items-center text-center">
+              <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-mint/50 flex items-center justify-center mb-2 sm:mb-4">
+                <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-mint-dark" />
+              </div>
+              <p className="text-xl sm:text-3xl font-display font-bold text-foreground">
+                {formatDuration(plan.dailyMinutes)}
+              </p>
+              <p className="text-xs sm:text-sm text-foreground-muted">Daily Goal</p>
+            </CardContent>
           </StatCardWrapper>
         </div>
 
@@ -301,8 +293,8 @@ function StatCardWrapper({ children, index }: { children: React.ReactNode; index
       }}
       className="relative"
     >
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 z-0">
+      <Card className={cn("h-full relative overflow-hidden bg-card-bg/95")}>
+        <div className="absolute inset-0 z-0 pointer-events-none">
           <FlickeringGrid
             squareSize={2}
             gridGap={3}
@@ -312,7 +304,7 @@ function StatCardWrapper({ children, index }: { children: React.ReactNode; index
           />
         </div>
         <div className="relative z-10">{children}</div>
-      </div>
+      </Card>
     </motion.div>
   )
 }

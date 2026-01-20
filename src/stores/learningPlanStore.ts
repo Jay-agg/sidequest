@@ -1,8 +1,22 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { get, set as idbSet, del as idbDel } from "idb-keyval";
 import type { LearningPlan, Technique, MasteryState } from "@/types";
 import { generateId } from "@/lib/utils";
 import { useUIStore } from "./uiStore";
+
+const indexedDbStringStorage = {
+  getItem: async (name: string) => {
+    const value = await get<string>(name);
+    return value ?? null;
+  },
+  setItem: async (name: string, value: string) => {
+    await idbSet(name, value);
+  },
+  removeItem: async (name: string) => {
+    await idbDel(name);
+  },
+};
 
 interface LearningPlanState {
   plans: LearningPlan[];
@@ -585,7 +599,7 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
     }),
     {
       name: "sidequest-learning-plan",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => indexedDbStringStorage),
       version: 2,
       migrate: (persisted: any) => {
         if (!persisted) return persisted;

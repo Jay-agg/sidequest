@@ -45,7 +45,7 @@ const DialogContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         style={{
-          backgroundColor: isMobile ? "#FFFFFF" : "var(--card)",
+          backgroundColor: "var(--card)",
           borderColor: "var(--card-border)",
         }}
         className={cn(
