@@ -7,33 +7,27 @@ SideQuest is a calm, local-first learning companion that helps you pick a hobby 
 
 [Watch the UI demo](https://youtu.be/9qrtgTYt3Rc)
 
+## HLD
+
+![High-level design diagram](public/HLD.png)
+
+
 ## What it does 
 
-- **Creates a focused learning plan** for your hobby and goal (powered by AI).
-- **Keeps the plan intentionally small** so you don’t accumulate an overwhelming list.
-- **Helps you practice and track mastery**, not just consume content.
-- **Stays local-first**: your progress is stored in the browser (IndexedDB), so it feels fast and works well even with spotty connectivity.
-
-
-## Main features
-
-- **AI-generated “5–8 technique” plan**
-  You provide a hobby, a goal, and how many minutes you can practice per day. Learn8 generates a short plan designed to fit that commitment.
-
-- **Explainable selection (no mystery plans)**
-  The app aims to show *why* each technique made the cut, so it feels like a plan you can trust and follow.
-
-- **Replace-not-add workflow**
-  If something doesn’t fit, you replace or refine items instead of piling on more.
-
-- **Anti-rabbit-hole reader mode**
-  Encourages short, intentional learning sessions with gentle nudges to stop when you’ve gotten what you need.
-
-- **Mastery tracking**
-  Techniques move through a clear progression (from starting out to mastered) so you always know what to practice next.
-
-- **Optional video enrichment**
-  Techniques can be enriched with a couple focused YouTube resources (if a YouTube API key is configured).
+- **AI-generated learning plans**: creates a curated set of techniques for your hobby + goal + time budget.
+- **Tasteful AI hobby image**: the home hero uses an AI-generated image stored as a base64 data URL so it doesn’t expire.
+- **Learning flow per technique**:
+  - **Learn**: YouTube tutorials (via the app’s API) and a short “I have learnt enough” CTA to move forward.
+  - **Quiz**: a short quiz tied to the technique content.
+  - **Flashcards**: swipeable flashcards after the quiz for reinforcement.
+  - **Practice**: lightweight practice tracking with a “Mark as Mastered” action.
+  - **Teach Back**: voice-based “teach back” with AI feedback.
+- **Progressive unlocking**: later techniques stay locked until earlier ones are mastered.
+- **“Too Hard” decomposition**: break a technique into smaller sub-techniques (AI-generated) and continue from there.
+- **Multi-hobby support**: create multiple plans and switch between them (mobile + desktop UI).
+- **Light + dark mode**: theme toggle across the app.
+- **Celebrations**: confetti + completion feedback when you finish techniques / a full plan.
+- **Local-first persistence**: plans are stored in **IndexedDB** (prevents localStorage quota issues with images).
 
 
 ## Tech overview 
@@ -90,13 +84,12 @@ Then open:
 - **Production build**: `npm run build`
 - **Start production server**: `npm run start`
 
-## Where the important stuff lives
+## High-level structure
 
-If you’re new to the codebase, these are good starting points:
-
-- `src/app/` — Routes and pages (Next.js App Router)
-- `src/app/api/` — API routes (plan generation lives here)
-- `src/lib/llm/` — The multi-stage LLM pipeline
-- `src/stores/` — Zustand stores for plans and UI state
+- `src/app/`: Next.js App Router pages and API routes (`src/app/api/*/route.ts`)
+- `src/components/`: UI + feature components (layout, onboarding, learning, modals, etc.)
+- `src/stores/`: Zustand stores (learning plans, UI state, theme, sync)
+- `src/lib/`: AI/LLM pipeline utilities, YouTube helpers, local persistence helpers
+- `public/`: Lottie animations and other static assets
 
 
