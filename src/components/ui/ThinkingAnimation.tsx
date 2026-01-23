@@ -9,10 +9,17 @@ export function ThinkingAnimation() {
   const [animationData, setAnimationData] = useState(null);
 
   useEffect(() => {
-    fetch("/brainstorm.json")
-      .then((res) => res.json())
-      .then((data) => setAnimationData(data))
-      .catch((err) => console.error("Failed to load animation:", err));
+    const loadAnimation = async () => {
+      try {
+        const res = await fetch("/brainstorm.json");
+        const data = await res.json();
+        setAnimationData(data);
+      } catch (err) {
+        console.error("Failed to load animation:", err);
+      }
+    };
+    
+    loadAnimation();
   }, []);
 
   if (!animationData) {

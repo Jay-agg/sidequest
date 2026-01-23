@@ -139,22 +139,6 @@ export const ResearcherOutputSchema = z.object({
 
 export type ResearcherOutput = z.infer<typeof ResearcherOutputSchema>;
 
-export const SyncActionSchema = z.object({
-  id: z.string(),
-  type: z.enum([
-    "update_mastery",
-    "replace_technique",
-    "decompose_technique",
-    "update_daily_minutes",
-    "create_plan",
-  ]),
-  payload: z.unknown(),
-  timestamp: z.number(),
-  synced: z.boolean(),
-});
-
-export type SyncAction = z.infer<typeof SyncActionSchema>;
-
 export const UserPreferencesSchema = z.object({
   dailyMinutes: z.number().min(10).max(60),
   preferredDepth: DepthLevelSchema,

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Trash2, RotateCcw, Download, Upload, AlertTriangle } from "lucide-react";
-import { useLearningPlanStore, useUIStore, useSyncStore } from "@/stores";
+import { useLearningPlanStore, useUIStore } from "@/stores";
 import { useIsMobile } from "@/hooks";
 import { Header, MobileNav, PlanSwitcher } from "@/components/layout";
 import { CommitmentDial } from "@/components/commitment";
@@ -22,9 +22,6 @@ import {
 
 function SettingsContent() {
   const plan = useLearningPlanStore((state) => state.plan);
-  const pendingCount = useSyncStore((state) =>
-    state.queue.filter((a) => !a.synced).length
-  );
   const isMobile = useIsMobile();
   const setIsMobile = useUIStore((state) => state.setIsMobile);
   const router = useRouter();

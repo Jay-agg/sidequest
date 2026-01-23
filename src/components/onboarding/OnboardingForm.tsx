@@ -399,7 +399,7 @@ export function OnboardingForm() {
                           autoFocus
                         />
                         <p className="text-xs text-foreground-muted mt-2">
-                          SideQuest focuses on mastery over breadth - one skill at a time
+                          SideQuest focuses on mastery over breadth
                         </p>
                       </motion.div>
 

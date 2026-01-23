@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Play, CheckCircle2, RotateCcw, Layers, Clock, ChevronRight, Trophy, Brain, Lock } from "lucide-react";
+import { Play, CheckCircle2, Layers, Clock, ChevronRight, Trophy, Brain, Lock } from "lucide-react";
 import type { Technique, MasteryState } from "@/types";
 import { Button, Card, CardContent, Progress } from "@/components/ui";
 import { cn, formatDuration } from "@/lib/utils";
@@ -14,7 +14,6 @@ interface TechniqueCardProps {
   technique: Technique;
   onStart: () => void;
   onUpdateMastery: (state: MasteryState) => void;
-  onReplace: () => void;
   onDecompose: () => void;
   isActive?: boolean;
   isLocked?: boolean;
@@ -38,7 +37,6 @@ export function TechniqueCard({
   technique,
   onStart,
   onUpdateMastery,
-  onReplace,
   onDecompose,
   isActive = false,
   isLocked = false,
@@ -203,11 +201,6 @@ export function TechniqueCard({
                         Mastered
                       </Button>
                     )}
-
-                    <Button size="sm" variant="ghost" onClick={onReplace}>
-                      <RotateCcw className="h-4 w-4" />
-                      <span className="hidden sm:inline">Replace</span>
-                    </Button>
 
                     {!isMastered && technique.masteryState !== "unstarted" && (
                       <Button size="sm" variant="ghost" onClick={onDecompose}>

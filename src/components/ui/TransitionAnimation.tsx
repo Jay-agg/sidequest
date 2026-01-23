@@ -30,16 +30,18 @@ export function TransitionAnimation({ onComplete }: TransitionAnimationProps) {
   const viewport = useViewportSize()
 
   useEffect(() => {
-    fetch("/transition.json")
-      .then((res) => res.json())
-      .then((data) => {
-        setAnimationData(data)
-      })
-      .catch((err) => {
-        console.error("Failed to load transition animation:", err)
-        onComplete()
-      })
-  }, [onComplete])
+    const loadAnimation = async () => {
+      try {
+        const res = await fetch("/transition.json");
+        const data = await res.json();
+        setAnimationData(data);
+      } catch (err) {
+        console.error("Failed to load transition animation:", err);
+        onComplete();
+      }
+    };
+    loadAnimation();
+  }, [onComplete]);
 
   useEffect(() => {
     if (animationData) {

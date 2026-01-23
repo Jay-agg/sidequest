@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, MicOff, CheckCircle2, AlertCircle, Sparkles, Lightbulb, RefreshCw } from "lucide-react";
+import { CheckCircle2, AlertCircle, Sparkles, Lightbulb, RefreshCw } from "lucide-react";
 import { Button, Card, CardContent, Textarea } from "@/components/ui";
 import type { Technique } from "@/types";
 
@@ -21,94 +21,9 @@ export function TeachBackMode({ technique, onComplete }: TeachBackModeProps) {
   } | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [speechSupported, setSpeechSupported] = useState(false);
-  const recognitionRef = useRef<any>(null);
-  const transcriptRef = useRef<string>("");
-  const isIntentionallyStoppedRef = useRef<boolean>(false);
-  const isRecordingRef = useRef<boolean>(false);
-
-  useEffect(() => {
-    isRecordingRef.current = isRecording;
-  }, [isRecording]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        setSpeechSupported(true);
-        recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = true;
-        recognitionRef.current.interimResults = false;
-        recognitionRef.current.lang = 'en-US';
-        
-        recognitionRef.current.onresult = (event: any) => {
-          let finalTranscript = transcriptRef.current;
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            if (event.results[i].isFinal) {
-              finalTranscript += event.results[i][0].transcript + " ";
-            }
-          }
-          transcriptRef.current = finalTranscript;
-        };
-
-        recognitionRef.current.onerror = (event: any) => {
-          if (isIntentionallyStoppedRef.current) {
-            return;
-          }
-          
-          const ignorableErrors = ['no-speech', 'aborted'];
-          if (!ignorableErrors.includes(event.error)) {
-            setIsRecording(false);
-            isRecordingRef.current = false;
-            const errorMessages: Record<string, string> = {
-              'network': 'Voice recognition requires an internet connection. Please type your explanation instead.',
-              'not-allowed': 'Microphone access denied. Please allow microphone access in your browser settings.',
-              'audio-capture': 'No microphone found. Please connect a microphone or type your explanation.',
-            };
-            setError(errorMessages[event.error] || 'Voice recording stopped. You can continue typing or try recording again.');
-            setTimeout(() => setError(null), 5000);
-          }
-        };
-
-        recognitionRef.current.onend = () => {
-          if (isRecordingRef.current && !isIntentionallyStoppedRef.current && recognitionRef.current) {
-            try {
-              recognitionRef.current.start();
-            } catch (e) {
-              setIsRecording(false);
-              isRecordingRef.current = false;
-            }
-          }
-        };
-      }
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        try {
-          isIntentionallyStoppedRef.current = true;
-          recognitionRef.current.stop();
-        } catch (e) {
-          // Ignore
-        }
-      }
-    };
-  }, []);
 
   const handleSubmit = async () => {
-    if (isRecording && recognitionRef.current) {
-      isIntentionallyStoppedRef.current = true;
-      isRecordingRef.current = false;
-      try {
-        recognitionRef.current.stop();
-      } catch (e) {
-        // Ignore
-      }
-      setIsRecording(false);
-    }
-    
-    const finalText = (explanation + (transcriptRef.current ? " " + transcriptRef.current : "")).trim();
+    const finalText = explanation.trim();
     if (!finalText) return;
 
     setIsAnalyzing(true);
@@ -133,7 +48,6 @@ export function TeachBackMode({ technique, onComplete }: TeachBackModeProps) {
       const data = await response.json();
       setFeedback(data.feedback);
       setExplanation(finalText);
-      transcriptRef.current = "";
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to analyze your explanation. Please try again.");
     } finally {
@@ -142,67 +56,10 @@ export function TeachBackMode({ technique, onComplete }: TeachBackModeProps) {
   };
 
   const handleReset = () => {
-    if (isRecording && recognitionRef.current) {
-      isIntentionallyStoppedRef.current = true;
-      isRecordingRef.current = false;
-      try {
-        recognitionRef.current.stop();
-      } catch (e) {
-        // Ignore
-      }
-      setIsRecording(false);
-    }
     setExplanation("");
     setFeedback(null);
     setError(null);
-    transcriptRef.current = "";
-    isIntentionallyStoppedRef.current = false;
   };
-
-  const toggleRecording = useCallback(() => {
-    if (!speechSupported || !recognitionRef.current) {
-      setError("Voice recognition is not supported in your browser. Please type your explanation.");
-      setTimeout(() => setError(null), 5000);
-      return;
-    }
-
-    if (isRecording) {
-      isIntentionallyStoppedRef.current = true;
-      isRecordingRef.current = false;
-      try {
-        recognitionRef.current.stop();
-      } catch (e) {
-        // Ignore
-      }
-      setIsRecording(false);
-      
-      if (transcriptRef.current.trim()) {
-        setExplanation((prev) => {
-          const trimmedTranscript = transcriptRef.current.trim();
-          if (!prev) return trimmedTranscript;
-          
-          const lastChar = prev.slice(-1);
-          const needsSpace = lastChar !== " " && lastChar !== "\n";
-          return prev + (needsSpace ? " " : "") + trimmedTranscript;
-        });
-      }
-      transcriptRef.current = "";
-    } else {
-      transcriptRef.current = "";
-      isIntentionallyStoppedRef.current = false;
-      isRecordingRef.current = true;
-      setIsRecording(true);
-      try {
-        recognitionRef.current.start();
-      } catch (e) {
-        setError("Failed to start recording. Please try again.");
-        setIsRecording(false);
-        isRecordingRef.current = false;
-        isIntentionallyStoppedRef.current = true;
-        setTimeout(() => setError(null), 5000);
-      }
-    }
-  }, [speechSupported, isRecording]);
 
   if (feedback) {
     const scoreColor = 
@@ -391,39 +248,12 @@ export function TeachBackMode({ technique, onComplete }: TeachBackModeProps) {
             <Textarea
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
-              placeholder={isRecording ? "Listening... Your words will appear here when you click Stop" : `Example: "${technique.name} is a fundamental technique that involves... It's important because... To practice it, you should... A common mistake beginners make is..."`}
+              placeholder={`Example: "${technique.name} is a fundamental technique that involves... It's important because... To practice it, you should... A common mistake beginners make is..."`}
               className="min-h-[200px] sm:min-h-[240px] resize-none pr-16 sm:pr-24 text-sm sm:text-base"
-              disabled={isAnalyzing || isRecording}
+              disabled={isAnalyzing}
             />
             
             <div className="absolute top-3 right-3 flex flex-col gap-2">
-              {/* <Button
-                variant="outline"
-                size="sm"
-                onClick={toggleRecording}
-                disabled={isAnalyzing}
-                title={!speechSupported ? "Voice recognition not supported in this browser" : isRecording ? "Stop recording" : "Start voice recording"}
-                className={`gap-2 ${
-                  isRecording ? "bg-red-500/10 border-red-500/30" : ""
-                } ${!speechSupported ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                {isRecording ? (
-                  <>
-                    <motion.div
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ repeat: Infinity, duration: 1 }}
-                    >
-                      <MicOff className="w-4 h-4 text-red-500" />
-                    </motion.div>
-                    <span className="text-red-500 hidden sm:inline">Stop</span>
-                  </>
-                ) : (
-                  <>
-                    <Mic className="w-4 h-4" />
-                    <span className="hidden sm:inline">Voice</span>
-                  </>
-                )}
-              </Button> */}
             </div>
 
             <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 flex items-center gap-2 sm:gap-3">
@@ -434,30 +264,6 @@ export function TeachBackMode({ technique, onComplete }: TeachBackModeProps) {
               </span>
             </div>
           </div>
-
-          <AnimatePresence>
-            {isRecording && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="mt-3 sm:mt-4 p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-red-500/10 border border-red-500/30">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <motion.div
-                      animate={{ scale: [1, 1.3, 1] }}
-                      transition={{ repeat: Infinity, duration: 1.5 }}
-                      className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500 flex-shrink-0"
-                    />
-                    <p className="text-xs sm:text-sm text-foreground">
-                      <strong className="text-red-500">Recording:</strong> Speak naturally and your words will appear above
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           <AnimatePresence>
             {error && (

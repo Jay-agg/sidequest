@@ -1,37 +1,24 @@
 "use client";
 
 import { useMemo } from "react";
-import { Sparkles, RotateCcw, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLearningPlanStore } from "@/stores";
 import { CircularProgress } from "@/components/ui";
-import { ThemeToggle } from "@/components/theme";
-import { cn } from "@/lib/utils";
-import { PlanSwitcherDesktop } from "./PlanSwitcherDesktop";
 import { AnimatedThemeToggler } from "../theme/AnimatedThemeToggle";
 
-interface HeaderProps {
-  className?: string;
-}
-
-export function Header({ className }: HeaderProps) {
+export function Header() {
   const plan = useLearningPlanStore((state) => state.plan);
+  const getProgress = useLearningPlanStore((state) => state.getProgress);
   const router = useRouter();
   
   const progress = useMemo(() => {
-    if (!plan) return { completed: 0, total: 0, percentage: 0 };
-    const completed = plan.techniques.filter((t) => t.masteryState === "mastered").length;
-    const total = plan.techniques.length;
-    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-    return { completed, total, percentage };
-  }, [plan?.techniques?.map((t) => `${t.id}:${t.masteryState}`).join(","), plan?.techniques?.length]);
+    return getProgress();
+  }, [getProgress, plan?.techniques?.map((t) => `${t.id}:${t.masteryState}`).join(","), plan?.techniques?.length]);
 
   return (
     <header
-      className={cn(
-        "sticky top-0 z-40 w-full glass border-b border-card-border",
-        className
-      )}
+      className="sticky top-0 z-40 w-full glass border-b border-card-border"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">

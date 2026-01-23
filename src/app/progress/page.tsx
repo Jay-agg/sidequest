@@ -15,14 +15,11 @@ import type { MasteryState } from "@/types";
 function ProgressContent() {
   const plan = useLearningPlanStore((state) => state.plan);
   const hasHydrated = useLearningPlanStore((state) => state.hasHydrated);
+  const getProgress = useLearningPlanStore((state) => state.getProgress);
   
   const progress = useMemo(() => {
-    if (!plan) return { completed: 0, total: 0, percentage: 0 };
-    const completed = plan.techniques.filter((t) => t.masteryState === "mastered").length;
-    const total = plan.techniques.length;
-    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-    return { completed, total, percentage };
-  }, [plan?.techniques?.map((t) => `${t.id}:${t.masteryState}`).join(","), plan?.techniques?.length]);
+    return getProgress();
+  }, [getProgress, plan?.techniques?.map((t) => `${t.id}:${t.masteryState}`).join(","), plan?.techniques?.length]);
   const isMobile = useIsMobile();
   const setIsMobile = useUIStore((state) => state.setIsMobile);
 

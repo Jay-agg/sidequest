@@ -1,0 +1,9 @@
+export { HeroSection } from "./HeroSection";
+export { StatsGrid } from "./StatsGrid";
+export { TechniquesSection } from "./TechniquesSection";
+export { ProgressPathSection } from "./ProgressPathSection";
+export { StatCard } from "./StatCard";
+export { ScrollSection } from "./ScrollSection";
+export { TechniqueCardWrapper } from "./TechniqueCardWrapper";
+export { StreakIcon } from "./StreakIcon";
+export { useConfettiEffect } from "./useConfettiEffect";

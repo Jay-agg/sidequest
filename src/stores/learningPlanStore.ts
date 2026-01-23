@@ -7,13 +7,16 @@ import { useUIStore } from "./uiStore";
 
 const indexedDbStringStorage = {
   getItem: async (name: string) => {
+    if (typeof window === "undefined") return null;
     const value = await get<string>(name);
     return value ?? null;
   },
   setItem: async (name: string, value: string) => {
+    if (typeof window === "undefined") return;
     await idbSet(name, value);
   },
   removeItem: async (name: string) => {
+    if (typeof window === "undefined") return;
     await idbDel(name);
   },
 };
@@ -38,7 +41,6 @@ interface LearningPlanActions {
   setGenerationError: (error: string | null) => void;
   setActiveTechnique: (techniqueId: string | null) => void;
   updateTechniqueMastery: (techniqueId: string, state: MasteryState) => void;
-  replaceTechnique: (oldTechniqueId: string, newTechnique: Technique) => void;
   decomposeTechnique: (techniqueId: string, microSteps: string[]) => void;
   addSubTechniques: (parentTechniqueId: string, subTechniques: Array<{
     name: string;
@@ -232,41 +234,6 @@ export const useLearningPlanStore = create<LearningPlanStore>()(
                   techniques: updatedTechniques,
                   streakDays: newStreak,
                   lastPracticeDate: newLastDate,
-                  updatedAt: Date.now(),
-                }
-              : p
-          ),
-        });
-      },
-
-      replaceTechnique: (oldTechniqueId, newTechnique) => {
-        const { plan } = get();
-        if (!plan) return;
-
-        const oldTechniqueIndex = plan.techniques.findIndex(
-          (t) => t.id === oldTechniqueId
-        );
-        if (oldTechniqueIndex === -1) return;
-
-        const updatedTechniques = [...plan.techniques];
-        updatedTechniques[oldTechniqueIndex] = {
-          ...newTechnique,
-          id: generateId(),
-          order: plan.techniques[oldTechniqueIndex].order,
-          masteryState: "unstarted",
-        };
-
-        set({
-          plan: {
-            ...plan,
-            techniques: updatedTechniques,
-            updatedAt: Date.now(),
-          },
-          plans: get().plans.map((p) =>
-            p.id === plan.id
-              ? {
-                  ...plan,
-                  techniques: updatedTechniques,
                   updatedAt: Date.now(),
                 }
               : p
