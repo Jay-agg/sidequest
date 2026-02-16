@@ -69,9 +69,9 @@ export default function Hero() {
                                 Start Learning <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
                             </button>
                         </Link>
-                        <a href="#features">
+                        <a href="https://www.youtube.com/watch?v=fR21z4WDIww" target="_blank" rel="noopener noreferrer">
                             <button className="text-xs sm:text-base md:text-lg px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 border-2 border-white/20 text-white/80 rounded-lg bg-transparent hover:bg-white/5 transition-all hover:scale-105 font-medium">
-                                Explore
+                                Demo Video
                             </button>
                         </a>
                     </motion.div>
