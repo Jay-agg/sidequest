@@ -5,7 +5,7 @@ SideQuest is a calm, local-first learning companion that helps you pick a hobby 
 
 ## UI Video Demo
 
-[Watch the UI demo](https://youtu.be/9qrtgTYt3Rc)
+[Watch the UI demo](https://youtu.be/fR21z4WDIww)
 
 ## HLD
 
