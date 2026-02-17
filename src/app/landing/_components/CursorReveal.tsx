@@ -65,6 +65,7 @@ export default function CursorReveal({ className }: CursorRevealProps) {
         const generateNoiseTexture = () => {
             const width = canvas.width;
             const height = canvas.height;
+            if (width === 0 || height === 0) return;
 
             noiseCanvas = document.createElement("canvas");
             noiseCanvas.width = width;
