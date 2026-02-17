@@ -76,35 +76,74 @@ export default function Navbar() {
 
                 <AnimatePresence>
                     {mobileOpen && (
-                        <motion.div
-                            className="md:hidden mt-4 pb-4"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            <div className="flex flex-col gap-3">
-                                {navItems.map((item) => (
-                                    <a
-                                        key={item.href}
-                                        href={item.href}
-                                        className="text-white/70 hover:text-white text-base font-medium py-2"
-                                        onClick={() => setMobileOpen(false)}
-                                    >
-                                        {item.label}
-                                    </a>
-                                ))}
-                                <div className="pt-4 border-t border-white/10">
+                        <>
+                            <motion.div
+                                className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.3 }}
+                                onClick={() => setMobileOpen(false)}
+                            />
+
+                            <motion.div
+                                className="fixed inset-x-0 top-0 z-50 md:hidden bg-black/95 backdrop-blur-xl border-b border-white/10"
+                                initial={{ y: "-100%" }}
+                                animate={{ y: 0 }}
+                                exit={{ y: "-100%" }}
+                                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            >
+                                <div className="flex items-center justify-between px-4 py-3">
                                     <Link
-                                        href="/"
-                                        className="block w-full text-center px-5 py-3 bg-white text-black font-semibold rounded-lg"
+                                        href="/landing"
+                                        className="text-xl font-bold text-white font-display"
                                         onClick={() => setMobileOpen(false)}
                                     >
-                                        Open App
+                                        SideQuest
                                     </Link>
+                                    <button
+                                        className="text-white p-2"
+                                        onClick={() => setMobileOpen(false)}
+                                        aria-label="Close menu"
+                                    >
+                                        <X className="w-6 h-6" />
+                                    </button>
                                 </div>
-                            </div>
-                        </motion.div>
+
+                                <div className="flex flex-col px-6 pb-8 pt-4">
+                                    {navItems.map((item, i) => (
+                                        <motion.a
+                                            key={item.href}
+                                            href={item.href}
+                                            className="text-white/80 hover:text-white text-2xl font-semibold py-4 border-b border-white/5 transition-colors"
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            transition={{ delay: i * 0.08, duration: 0.3 }}
+                                            onClick={() => setMobileOpen(false)}
+                                        >
+                                            {item.label}
+                                        </motion.a>
+                                    ))}
+
+                                    <motion.div
+                                        className="pt-8"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        transition={{ delay: 0.25, duration: 0.3 }}
+                                    >
+                                        <Link
+                                            href="/"
+                                            className="flex items-center justify-center gap-2 w-full px-6 py-3.5 bg-white text-black font-semibold rounded-xl text-lg hover:bg-white/90 transition-all active:scale-95"
+                                            onClick={() => setMobileOpen(false)}
+                                        >
+                                            Open App <ArrowRight className="h-4 w-4" />
+                                        </Link>
+                                    </motion.div>
+                                </div>
+                            </motion.div>
+                        </>
                     )}
                 </AnimatePresence>
             </div>
